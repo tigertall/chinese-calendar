@@ -19,8 +19,7 @@
 
 ### 扩展管理器
 
-在操作系统的 `扩展管理` 中，搜索 `Chinese Calendar` 进行安装
-进行安装。
+在操作系统的 `扩展管理` 中，搜索 `Chinese Calendar` 进行安装。
 
 ### Gnome Extensions 网站
 
