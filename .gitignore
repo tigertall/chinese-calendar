@@ -1,0 +1,23 @@
+# Ignore build files
+build/
+
+# Ignore IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore temporary files
+*.tmp
+*.temp
+
+# Ignore test files (if not needed for production)
+# test*.js
+
+# Ignore zip files
+*.zip

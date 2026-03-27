@@ -1,0 +1,83 @@
+/* Lunar Calendar Extension Styles */
+
+/* ===== Calendar Grid Modifications ===== */
+
+/* Make calendar cells taller to fit two lines */
+.lunar-calendar .calendar-weekday,
+.lunar-calendar .calendar-weekend {
+    height: 3.6em;
+    width: 3.6em;
+}
+
+/* Wider month header for Chinese text */
+.lunar-calendar .calendar-month-header .calendar-month-label {
+    width: 16em;
+}
+
+/* Day with events - fix background for two-line layout */
+.lunar-calendar .calendar-day-with-events {
+    background-size: cover;
+}
+
+/* Lunar day overlay label */
+.lunar-calendar .lunar-day {
+    background-color: transparent !important;
+    font-size: 0.68em;
+}
+
+/* Today's lunar date */
+.lunar-calendar .lunar-day.calendar-today {
+    font-weight: bold;
+}
+
+/* ===== Rest/Work Badge on Calendar Grid ===== */
+.lunar-badge {
+    font-size: 0.6em;
+    font-weight: bold;
+}
+
+.lunar-badge-rest {
+    color: #4caf50;
+}
+
+.lunar-badge-work {
+    color: #ff5722;
+}
+
+/* ===== Lunar Info Section in Calendar Popup ===== */
+.lunar-info-box {
+    padding: 8px 14px;
+    margin: 4px 0;
+    spacing: 4px;
+}
+
+.lunar-detail-date {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #eeeeee;
+}
+
+.lunar-detail-ganzhi {
+    font-size: 0.95em;
+    color: #cccccc;
+}
+
+.lunar-detail-solarterm {
+    font-size: 0.95em;
+    color: #81d4fa;
+}
+
+.lunar-detail-festival {
+    font-size: 0.95em;
+    color: #f5c211;
+}
+
+.lunar-detail-statutory {
+    font-size: 0.95em;
+    color: #a5d6a7;
+}
+
+/* Message view container */
+.message-view {
+    margin-bottom: 4px;
+}

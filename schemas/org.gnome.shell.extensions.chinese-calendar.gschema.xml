@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="chinese-calendar">
+  <schema id="org.gnome.shell.extensions.chinese-calendar"
+          path="/org/gnome/shell/extensions/chinese-calendar/">
+
+    <key name="show-lunar-in-panel" type="b">
+      <default>true</default>
+      <summary>Show lunar date in panel</summary>
+      <description>Whether to show the lunar date next to the clock in the top panel.</description>
+    </key>
+
+    <key name="show-festivals-in-panel" type="b">
+      <default>false</default>
+      <summary>Show festivals in panel</summary>
+      <description>Whether to show festival information next to the clock in the top panel.</description>
+    </key>
+
+    <key name="show-statutory-holidays" type="b">
+      <default>true</default>
+      <summary>Show statutory holidays</summary>
+      <description>Whether to show statutory holiday markers (rest/work) in the calendar.</description>
+    </key>
+
+    <key name="holiday-data-url" type="s">
+      <default>'https://www.shuyz.com/githubfiles/china-holiday-calender/master/holidayAPI.json'</default>
+      <summary>Holiday data URL</summary>
+      <description>URL to fetch statutory holiday data from.</description>
+    </key>
+
+    <key name="holiday-data-cache" type="s">
+      <default>''</default>
+      <summary>Cached holiday data</summary>
+      <description>Cached JSON data of statutory holidays.</description>
+    </key>
+
+    <key name="holiday-data-last-update" type="s">
+      <default>''</default>
+      <summary>Last update timestamp</summary>
+      <description>ISO date string of when holiday data was last updated.</description>
+    </key>
+
+  </schema>
+</schemalist>

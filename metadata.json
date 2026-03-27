@@ -1,0 +1,10 @@
+{
+    "name": "Chinese Calendar",
+    "description": "在 GNOME 顶栏时钟和日历卡片中显示中国农历日期、节气、传统节日和法定节假日信息",
+    "uuid": "chinese-calendar@tigertall",
+    "url": "",
+    "shell-version": ["45", "46", "47", "48", "49", "50"],
+    "version": 1,
+    "settings-schema": "org.gnome.shell.extensions.chinese-calendar",
+    "gettext-domain": "chinese-calendar"
+}
