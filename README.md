@@ -2,7 +2,7 @@
 
 在 GNOME 时钟面板和日历卡片中显示中国农历日期、节气、传统节日和法定节假日信息。
 
-<img width="1200" alt="calendar" src="https://github.com/user-attachments/assets/a4b8da21-97f7-4677-b895-3730c5037dad" />
+<img width="800" alt="calendar" src="https://github.com/user-attachments/assets/a4b8da21-97f7-4677-b895-3730c5037dad" />
 
 ## 功能特性
 
@@ -27,7 +27,7 @@
 
 ## 设置选项
 
-<img width="800" alt="settings" src="https://github.com/user-attachments/assets/2176a289-f00a-410b-8d62-98edde0b0a83" />
+<img width="400" alt="settings" src="https://github.com/user-attachments/assets/2176a289-f00a-410b-8d62-98edde0b0a83" />
 
 ### 面板显示
 
