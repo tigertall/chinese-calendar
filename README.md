@@ -27,7 +27,7 @@
 
 ## 设置选项
 
-<img width="400" alt="settings" src="https://github.com/user-attachments/assets/2176a289-f00a-410b-8d62-98edde0b0a83" />
+<img width="400" alt="settings" src="https://github.com/user-attachments/assets/0b76b967-a315-4ab1-ae3d-64de518589c2" />
 
 ### 面板显示
 
