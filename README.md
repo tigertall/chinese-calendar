@@ -23,7 +23,7 @@
 
 1. 下载扩展文件压缩包
 2. `gnome-extensions install chinese-calendar.zip`
-3. 退出当前的GNOME会话，重新登录，或者直接重启，这样才能在GNOME扩展管理显示
+3. 退出当前的 GNOME 会话，重新登录，或者直接重启，这样才能在 GNOME 扩展管理中显示
 4. 在 GNOME 扩展管理中启用和设置扩展
 
 ## 设置选项
