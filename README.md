@@ -2,6 +2,8 @@
 
 在 GNOME 时钟面板和日历卡片中显示中国农历日期、节气、传统节日和法定节假日信息。
 
+<img width="800" alt="calendar" src="https://github.com/user-attachments/assets/a4b8da21-97f7-4677-b895-3730c5037dad" />
+
 ## 功能特性
 
 - 在顶部面板时钟旁显示农历日期
@@ -15,12 +17,17 @@
 
 ## 安装方法
 
-1. 下载扩展文件
-2. 解压到 `~/.local/share/gnome-shell/extensions/` 目录
-3. 重启 GNOME Shell（按 Alt+F2，输入 r 并回车）
-4. 在 GNOME 扩展管理中启用扩展
+### 手动安装
+
+提交到 gnome-extensions 的插件还在审核，所以目前可以手工安装。
+
+1. 下载扩展文件压缩包
+2. `gnome-extensions install chinese-calendar.zip`
+3. 在 GNOME 扩展管理中启用和设置扩展
 
 ## 设置选项
+
+<img width="400" alt="settings" src="https://github.com/user-attachments/assets/0b76b967-a315-4ab1-ae3d-64de518589c2" />
 
 ### 面板显示
 
@@ -36,11 +43,3 @@
 ## 感谢
 
 - 感谢 [china-holiday-calender](https://github.com/lanceliao/china-holiday-calender) 项目提供的节假日调休数据 API
-
-## 项目地址
-
-- [GitHub 仓库](https://github.com/tigertall/chinese-calendar) - 用于提交 bug 和功能建议
-
-## 许可证
-
-MIT License

@@ -17,7 +17,7 @@ Thumbs.db
 *.temp
 
 # Ignore test files (if not needed for production)
-test*.js
+# test*.js
 
 # Ignore zip files
 *.zip

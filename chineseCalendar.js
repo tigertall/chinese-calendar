@@ -1,4 +1,4 @@
-// Lunar Calendar calculation module for GNOME Shell Extension
+// Chinese Calendar calculation module for GNOME Shell Extension
 // GNOME Shell 48 ESM Module
 
 /**
