@@ -105,13 +105,6 @@ export default class ChineseCalendarExtension extends Extension {
     disable() {
         const dm = Main.panel.statusArea.dateMenu;
 
-        // 恢复日历样式
-        if (dm._calendar) {
-            let styleClasses = dm._calendar.style_class.split(' ')
-                .filter(e => e.length && !e.startsWith('lunar-'));
-            dm._calendar.style_class = styleClasses.join(' ');
-        }
-
         // 清除注入
         if (this._injectionManager) {
             this._injectionManager.clear();
@@ -157,6 +150,15 @@ export default class ChineseCalendarExtension extends Extension {
         if (this._holidayManager) {
             this._holidayManager.destroy();
             this._holidayManager = null;
+        }
+
+        // 恢复日历样式并重建日历
+        if (dm._calendar) {
+            let styleClasses = dm._calendar.style_class.split(' ')
+                .filter(e => e.length && !e.startsWith('lunar-'));
+            dm._calendar.style_class = styleClasses.join(' ');
+            // 重建日历以清除农历信息
+            dm._calendar._rebuildCalendar();
         }
 
         this._settings = null;
@@ -233,6 +235,39 @@ export default class ChineseCalendarExtension extends Extension {
 
         const ml = dm._messageList;
 
+        // 用于在日历格子中创建带农历的按钮
+        const lunarButton = (origButton, iterDate, oargs) => {
+            let newButton;
+            if (+oargs[0].label === +iterDate.getDate().toString()) {
+                iterDate._lunarIterFound = true;
+
+                const year = iterDate.getFullYear();
+                const month = iterDate.getMonth() + 1;
+                const day = iterDate.getDate();
+
+                const info = ChineseCalendar.solarToLunar(year, month, day);
+                const cellText = info ? ChineseCalendar.getDisplayText(info) : '';
+
+                // 添加换行使日历格子能显示两行
+                if (cellText) {
+                    oargs[0].label += '\n';
+                }
+
+                newButton = _makeNew(origButton, oargs);
+
+                if (cellText) {
+                    newButton._lunarText = cellText;
+                    newButton._lunarInfo = info;
+                    newButton._lunarYear = year;
+                    newButton._lunarMonth = month;
+                    newButton._lunarDay = day;
+                }
+            } else {
+                newButton = _makeNew(origButton, oargs);
+            }
+            return newButton;
+        };
+
         // 覆盖 _rebuildCalendar 方法
         this._injectionManager.overrideMethod(
             cal, '_rebuildCalendar', originalMethod => function () {
@@ -240,40 +275,24 @@ export default class ChineseCalendarExtension extends Extension {
                 rebuildInProgress = true;
 
                 const origButton = St.Button;
-                
-                // 获取当前日历显示的月份和年份
-                // 优先使用日历的 _selectedDate，否则使用系统当前日期
-                const currentDate = cal._selectedDate || new Date();
-                const year = currentDate.getFullYear();
-                const month = currentDate.getMonth() + 1;
+                const origDate = Date;
+                let iterDate = new origDate();
+
+                // 临时替换 Date 构造函数来追踪迭代日期
+                Date = function () {
+                    let newDate = _makeNew(origDate, arguments);
+                    if (!iterDate._lunarIterFound &&
+                        arguments.length > 0 && arguments[0] instanceof origDate) {
+                        iterDate = newDate;
+                    }
+                    return newDate;
+                };
+                // 保留 Date.UTC 静态方法
+                Date.UTC = origDate.UTC;
 
                 // 临时替换 St.Button 来注入农历文本
                 St.Button = function () {
-                    let newButton = _makeNew(origButton, arguments);
-                    
-                    // 从按钮标签获取日期
-                    if (arguments[0] && arguments[0].label) {
-                        const dayStr = arguments[0].label;
-                        const day = parseInt(dayStr, 10);
-                        
-                        if (!isNaN(day) && day > 0 && day <= 31) {
-                            // 计算农历信息
-                            const info = ChineseCalendar.solarToLunar(year, month, day);
-                            const cellText = info ? ChineseCalendar.getDisplayText(info) : '';
-
-                            // 添加换行使日历格子能显示两行
-                            if (cellText) {
-                                newButton.label += '\n';
-                                newButton._lunarText = cellText;
-                                newButton._lunarInfo = info;
-                                newButton._lunarYear = year;
-                                newButton._lunarMonth = month;
-                                newButton._lunarDay = day;
-                            }
-                        }
-                    }
-                    
-                    return newButton;
+                    return lunarButton(origButton, iterDate, arguments);
                 };
 
                 // 临时覆盖 layout attach 来添加农历标签层
@@ -328,6 +347,7 @@ export default class ChineseCalendarExtension extends Extension {
                 originalMethod.apply(this, arguments);
 
                 St.Button = origButton;
+                Date = origDate;
                 tempInjection.clear();
 
                 // 添加农历日历样式类

@@ -2,9 +2,6 @@
 // Manages statutory holiday data fetching and caching
 // GNOME Shell 48 ESM Module
 
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import Soup from 'gi://Soup?version=3.0';
 
 /**
  * 法定节假日管理器
