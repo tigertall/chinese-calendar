@@ -3,6 +3,9 @@ import * as LC from './chineseCalendar.js';
 
 // 测试几个已知日期
 const testCases = [
+    { year: 2022, month: 9, day: 7, expected: '白露' },
+    { year: 2023, month: 11, day: 8, expected: '立冬' },
+    { year: 2023, month: 11, day: 22, expected: '小雪' },
     { year: 2024, month: 2, day: 10, expected: '春节' },
     { year: 2024, month: 1, day: 1, expected: '元旦' },
     { year: 2025, month: 1, day: 29, expected: '春节' },

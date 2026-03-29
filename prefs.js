@@ -199,10 +199,13 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
                                 const decoder = new TextDecoder('utf-8');
                                 const text = decoder.decode(bytes.get_data());
                                 
-                                // 验证JSON格式
+                                // 验证JSON格式并压缩存储
                                 try {
-                                    JSON.parse(text);
-                                    settings.set_string('holiday-data-cache', text);
+                                    const data = JSON.parse(text);
+                                    // 压缩数据：去掉URL和Memo字段
+                                    const compressedData = this._compressHolidayData(data);
+                                    // 使用压缩格式存储（无格式化）
+                                    settings.set_string('holiday-data-cache', JSON.stringify(compressedData));
                                     settings.set_string('holiday-data-last-update',
                                         new Date().toISOString());
                                     
@@ -226,5 +229,30 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
                 resolve(false);
             }
         });
+    }
+
+    /**
+     * 压缩节假日数据，去掉不必要的字段
+     * @param data 原始节假日数据
+     * @returns 压缩后的数据
+     */
+    _compressHolidayData(data) {
+        if (!data || !data.Years) return data;
+        
+        const compressed = { Years: {} };
+        
+        for (const yearStr of Object.keys(data.Years)) {
+            const yearHolidays = data.Years[yearStr];
+            if (!Array.isArray(yearHolidays)) continue;
+            
+            compressed.Years[yearStr] = yearHolidays.map(holiday => ({
+                Name: holiday.Name,
+                StartDate: holiday.StartDate,
+                EndDate: holiday.EndDate,
+                CompDays: holiday.CompDays || []
+            }));
+        }
+        
+        return compressed;
     }
 }
