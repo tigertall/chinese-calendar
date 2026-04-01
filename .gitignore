@@ -21,3 +21,15 @@ Thumbs.db
 
 # Ignore zip files
 *.zip
+
+# Ignore node_modules
+node_modules/
+
+# Ignore npm debug logs
+npm-debug.log*
+
+# Ignore ESLint cache and output
+.eslintcache
+
+# Ignore package lock file (uncomment to ignore)
+# package-lock.json

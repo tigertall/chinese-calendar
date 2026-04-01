@@ -1,5 +1,8 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // 读取solartrm_std.json文件
 function readSolarTermsData() {
@@ -40,7 +43,7 @@ function main() {
                      '小暑', '大暑', '立秋', '处暑', '白露', '秋分',
                      '寒露', '霜降', '立冬', '小雪', '大雪', '冬至'];
     
-    console.log('SOLAR_TERM_INFO = [', solarTermInfo.join(', '), '];');
+    console.log('SOLAR_TERM_INFO = ['+ solarTermInfo.join(', ') + '];');
 }
 
 // 运行

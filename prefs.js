@@ -211,15 +211,15 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
                                     
                                     resolve(true);
                                 } catch (e) {
-                                    console.error('JSON parse error:', e);
+                                    console.error('[ChineseCalendar] JSON parse error:', e);
                                     resolve(false);
                                 }
                             } else {
-                                console.error('HTTP Error:', status);
+                                console.error('[ChineseCalendar] HTTP Error:', status);
                                 resolve(false);
                             }
                         } catch (e) {
-                            console.error('Error fetching data:', e);
+                            console.error('[ChineseCalendar] Error fetching data:', e);
                             resolve(false);
                         }
                     }

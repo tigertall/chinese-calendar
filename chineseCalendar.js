@@ -200,7 +200,7 @@ export function getSolarTerm(year, month, day) {
     const termIndex1 = (month - 1) * 2;
     const termIndex2 = termIndex1 + 1;
 
-    for (let idx of [termIndex1, termIndex2]) {
+    for (const idx of [termIndex1, termIndex2]) {
         const offDate = new Date(((year - YEAR_BASE) * TROPICAL_YEAR * 24 * 60  + 
             SOLAR_TERM_INFO[idx] + TERM_FIX_INFO[idx]) * 60000 + new Date(YEAR_BASE, 0, 1).getTime());
 

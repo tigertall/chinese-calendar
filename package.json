@@ -1,0 +1,14 @@
+{
+  "name": "chinese-calendar",
+  "version": "1.0.0",
+  "description": "Chinese Calendar GNOME Shell Extension",
+  "type": "module",
+  "scripts": {
+    "eslint": "eslint",
+    "build": "rm -f chinese-calendar.zip && zip -r chinese-calendar.zip chineseCalendar.js extension.js holidayManager.js LICENSE metadata.json prefs.js README.md stylesheet.css schemas/ && echo \"Extension package 'chinese-calendar.zip' has been created.\""
+  },
+  "devDependencies": {
+    "@eslint/config-helpers": "^0.2.0",
+    "eslint": "^9.0.0"
+  }
+}

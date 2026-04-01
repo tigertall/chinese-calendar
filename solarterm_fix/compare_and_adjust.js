@@ -1,15 +1,4 @@
-const fs = require('fs');
-const path = require('path');
-
-// 导入tyme.js
-const tyme = require('./tyme.js');
-
-// 读取solarterms_std.json文件
-function readSolarTermsData() {
-    const filePath = path.join(__dirname, 'solarterms_std.json');
-    const data = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(data);
-}
+import tyme from './tyme.cjs';
 
 const termNames = ['小寒', '大寒', '立春', '雨水', '惊蛰', '春分',
                      '清明', '谷雨', '立夏', '小满', '芒种', '夏至',
@@ -98,7 +87,7 @@ function compareAndAdjust() {
         // min max 符号不同，说明可以容忍0分钟调整量，不需要修正；否则按照min来调整
         return Math.sign(fix[0]) !== Math.sign(fix[1]) ? 0 : fix[0];
     });
-    console.log('TERM_FIX_INFO = [', adjValues.join(', '), '];');
+    console.log('TERM_FIX_INFO = [' +  adjValues.join(', ') + '];');
     
     return;
 }
