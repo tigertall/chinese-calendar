@@ -319,7 +319,7 @@ export default class ChineseCalendarExtension extends Extension {
                                     child._lunarYear, child._lunarMonth, child._lunarDay);
                                 if (statutory) {
                                     let badgeText, badgeClass;
-                                    if (statutory.isOffDay) {
+                                    if (statutory.isHoliday) {
                                         badgeText = '休';
                                         badgeClass = 'lunar-badge lunar-badge-rest';
                                     } else if (statutory.isWorkDay) {
