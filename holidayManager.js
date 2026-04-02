@@ -10,7 +10,7 @@
 export class HolidayManager {
     constructor(settings) {
         this._settings = settings;
-        this._holidayData = new Map(); // year -> { date -> {holiday, name, isOffDay} }
+        this._holidayData = new Map(); // date (YYYY-MM-DD) -> {isHoliday, isWorkday, name}
         this._loadCachedData();
     }
 
@@ -25,7 +25,7 @@ export class HolidayManager {
                 this._parseHolidayData(data);
             }
         } catch (e) {
-            log(`[LunarCalendar] Failed to load cached holiday data: ${e.message}`);
+            log(`[ChineseCalendar] Failed to load cached holiday data: ${e.message}`);
         }
     }
 
@@ -45,56 +45,42 @@ export class HolidayManager {
         if (!data || !data.Years) return;
 
         for (const yearStr of Object.keys(data.Years)) {
-            const year = parseInt(yearStr);
-            const yearData = new Map();
-
             const holidays = data.Years[yearStr];
             if (!Array.isArray(holidays)) continue;
 
             for (const holiday of holidays) {
                 if (!holiday.StartDate || !holiday.EndDate || !holiday.Name) continue;
 
-                // 处理放假日期范围
-                const startDate = new Date(holiday.StartDate);
-                const endDate = new Date(holiday.EndDate);
+                // 处理放假日期范围，按照北京时间处理
+                const startDate = new Date(holiday.StartDate + 'T00:00:00+08:00');
+                const endDate = new Date(holiday.EndDate + 'T00:00:00+08:00');
                 
                 // 遍历从开始日期到结束日期的每一天
                 for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-                    const month = String(d.getMonth() + 1).padStart(2, '0');
-                    const day = String(d.getDate()).padStart(2, '0');
-                    const dateKey = `${month}-${day}`;
+                    const dateKey = `${d.getFullYear()}-` +
+                                  `${String(d.getMonth() + 1).padStart(2, '0')}-` +
+                                  `${String(d.getDate()).padStart(2, '0')}`;
 
-                    yearData.set(dateKey, {
-                        holiday: true,
+                    this._holidayData.set(dateKey, {
+                        isHoliday: true,
+                        isWorkday: false,
                         name: holiday.Name,
-                        wage: 1, // 默认工资倍数
-                        isOffDay: true,
-                        after: false,
-                        target: '',
                     });
                 }
 
                 // 处理调休补班日期
                 if (Array.isArray(holiday.CompDays)) {
                     for (const compDay of holiday.CompDays) {
-                        const compDate = new Date(compDay);
-                        const month = String(compDate.getMonth() + 1).padStart(2, '0');
-                        const day = String(compDate.getDate()).padStart(2, '0');
-                        const dateKey = `${month}-${day}`;
+                        const dateKey = compDay;
 
-                        yearData.set(dateKey, {
-                            holiday: false,
+                        this._holidayData.set(dateKey, {
+                            isHoliday: false,
+                            isWorkday: true,
                             name: holiday.Name + '（调休）',
-                            wage: 1, // 默认工资倍数
-                            isOffDay: false,
-                            after: true,
-                            target: '',
                         });
                     }
                 }
             }
-
-            this._holidayData.set(year, yearData);
         }
     }
 
@@ -103,25 +89,19 @@ export class HolidayManager {
      * @param year 公历年
      * @param month 公历月 (1-12)
      * @param day 公历日
-     * @returns {Object|null} { isOffDay, isWorkDay, name, wage }
+     * @returns {Object|null} { isHoliday, isWorkDay, name }
      */
     getStatutoryHoliday(year, month, day) {
-        const yearData = this._holidayData.get(year);
-        if (!yearData) return null;
-
-        const dateKey = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const entry = yearData.get(dateKey);
+        const dateKey = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const entry = this._holidayData.get(dateKey);
         if (!entry) return null;
 
         return {
-            isOffDay: entry.holiday === true || entry.isOffDay === true,
-            isWorkDay: entry.holiday === false && entry.after === true, // 调休补班
+            isHoliday: entry.isHoliday,
+            isWorkDay: entry.isWorkday, // 调休补班
             name: entry.name || '',
-            target: entry.target || '',
         };
     }
-
-
 
     /**
      * 销毁管理器
