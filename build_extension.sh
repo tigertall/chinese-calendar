@@ -1,5 +1,6 @@
 #!/bin/bash
 
+rm -f chinese-calendar.zip
 zip -r chinese-calendar.zip chineseCalendar.js extension.js holidayManager.js \
  LICENSE metadata.json prefs.js README.md stylesheet.css schemas/
 

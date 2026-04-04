@@ -14,6 +14,7 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
         window._settings = settings;
+        window._timeoutId = 0;
 
         // === 通用设置页 ===
         const generalPage = new Adw.PreferencesPage({
@@ -121,7 +122,12 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
                     updateButton.label = '更新失败';
                 }
                 // 3秒后恢复按钮文本
-                GLib.timeout_add(GLib.PRIORITY_DEFAULT, 3000, () => {
+                if (window._timeoutId) {
+                    GLib.source_remove(window._timeoutId);
+                    window._timeoutId = 0;
+                }
+                window._timeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 3000, () => {
+                    window._timeoutId = 0;
                     if (updateButton && !updateButton.is_destroyed?.()) {
                         updateButton.label = '立即更新';
                     }
@@ -171,6 +177,13 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
         apiRow.add_suffix(apiButton);
         apiRow.activatable_widget = apiButton;
         aboutGroup.add(apiRow);
+
+        window.connect('close-request', () => {
+            if (window._timeoutId) {
+                GLib.source_remove(window._timeoutId);
+                window._timeoutId = 0;
+            }
+        });
     }
 
     _fetchHolidayData(settings) {
