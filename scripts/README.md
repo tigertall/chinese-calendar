@@ -3,7 +3,7 @@
 <br />
 
 这些脚本用于生成插件的节气信息中使用的TERM\_FIX\_INFO变量，描述了计算过程。
-依赖 tyme.js （<https://github.com/6tail/tyme4ts/releases），来计算准确的节气时间。>
+依赖 tyme.js （<https://github.com/6tail/tyme4ts/releases>），来计算准确的节气时间。
 
 # generate\_solar\_terms.js
 
@@ -21,3 +21,7 @@
 - 计算下一年的数据，与之前的 \[min, max] 区间取交集，逐渐收缩 \[min, max] 可用的分钟数范围。
 - 最终得到的 \[min, max] 就是这个节气的保持日期正确的分钟可调整区间。如果触发调整后的min > max ，那就是发生了冲突。
 - 可以工作到冲突年份之前，目前基于2000年来看，首次冲突会发生在2054年冬至。
+
+# check\_holidays.js
+
+一个生成节假日 json 的脚本，用于 github pages 部署，提供json api 访问，目前使用的shuyz的接口，所以这个暂时应该用不到。
