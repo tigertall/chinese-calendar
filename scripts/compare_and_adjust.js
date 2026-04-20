@@ -21,8 +21,8 @@ function readSolarTermsData() {
 function calcSolarTermInfo(baseYear) {
     const data = readSolarTermsData();
     const yearTerms = data[baseYear.toString()];
-    const baseDate = new Date(baseYear, 0, 1, 0, 0, 0); // baseYear年1月1日0时0分0秒
-    
+    const baseDate = new Date(`${baseYear}-01-01T00:00:00+08:00`); // baseYear年1月1日0时0分0秒
+
     // 正确的节气顺序（与SOLAR_TERMS一致，从小寒开始计数）
     const solarTermInfo = [];
 
@@ -70,11 +70,11 @@ function compareAndAdjust() {
             const tymeDay = tymeSolarDay.getDay();
 
             // 计算tyme.js日期的0点0分0秒和23点59分59秒
-            const tymeDateStart = new Date(tymeYear, tymeMonth - 1, tymeDay, 0, 0, 0);
-            const tymeDateEnd = new Date(tymeYear, tymeMonth - 1, tymeDay, 23, 59, 59);
+            const tymeDateStart = new Date(`${tymeYear}-${tymeMonth.toString().padStart(2, '0')}-${tymeDay.toString().padStart(2, '0')}T00:00:00+08:00`);
+            const tymeDateEnd = new Date(`${tymeYear}-${tymeMonth.toString().padStart(2, '0')}-${tymeDay.toString().padStart(2, '0')}T23:59:59+08:00`);
 
             const baseMinutes = (year - YEAR_BASE) * TROPICAL_YEAR * 24 * 60 + SOLAR_TERM_INFO[termIndex];
-            const linearDate = new Date(baseMinutes * 60000 + new Date(YEAR_BASE, 0, 1).getTime());
+            const linearDate = new Date(baseMinutes * 60000 + new Date(`${YEAR_BASE}-01-01T00:00:00+08:00`).getTime());
             // console.log(`linearDate: ${linearDate.toLocaleString()}, tymeDate: ${tymeDateStart.toLocaleDateString()}`);
 
             // 计算调整量范围

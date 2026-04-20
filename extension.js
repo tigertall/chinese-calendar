@@ -193,7 +193,7 @@ export default class ChineseCalendarExtension extends Extension {
 
         // 显示农历信息（如果启用）
         if (showInPanel) {
-            parts.push(info.monthName + info.dayName);
+            parts.push(info.fullDate);
         }
 
         // 显示节日信息（如果启用）
@@ -278,9 +278,9 @@ export default class ChineseCalendarExtension extends Extension {
                             if (cellText) {
                                 newButton._lunarText = cellText;
                                 newButton._lunarInfo = info;
-                                newButton._lunarYear = year;
-                                newButton._lunarMonth = month;
-                                newButton._lunarDay = day;
+                                newButton._year = iterDate.getFullYear();
+                                newButton._month = iterDate.getMonth() + 1;
+                                newButton._day = iterDate.getDate();
                             }
 
                             return newButton;
@@ -314,9 +314,9 @@ export default class ChineseCalendarExtension extends Extension {
 
                             // 法定假日标记（休/班）
                             if (self._settings.get_boolean('show-statutory-holidays') &&
-                                self._holidayManager && child._lunarYear) {
+                                self._holidayManager && child._year) {
                                 const statutory = self._holidayManager.getStatutoryHoliday(
-                                    child._lunarYear, child._lunarMonth, child._lunarDay);
+                                    child._year, child._month, child._day);
                                 if (statutory) {
                                     let badgeText, badgeClass;
                                     if (statutory.isHoliday) {

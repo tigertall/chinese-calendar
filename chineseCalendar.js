@@ -62,7 +62,7 @@ const SOLAR_TERMS = [
 // 节气数据表 - 每年24节气对应的分钟偏移量基准，目前能用到 2053年，2054年冲突不可避免。
 const TROPICAL_YEAR = 365.24219878;  // 回归年长度 (天)
 const YEAR_BASE = 2000; // 计算基准年
-// 数组每一项代表在2000年该节气时间距离2000年1月1日0时0分0秒的总分钟数
+// 数组每一项代表在2000年该节气距离北京时间2000年1月1日0时0分0秒的总分钟数
 // 节气时间： https://dijizhou.100xgj.com/jieqibiao/2026 或者使用 tyme.js库来计算
 // 紫金山天文台 pdf https://pmo.cas.cn/xwdt2019/kpdt2019/202203/t20220309_6386774.html
 const SOLAR_TERM_INFO = [ 7740, 28943, 50200, 71553, 93042, 114695,
@@ -72,16 +72,14 @@ const SOLAR_TERM_INFO = [ 7740, 28943, 50200, 71553, 93042, 114695,
 ];
 
 // 有些年份计算后发生跨日偏移，需要修正，数据计算过程参考 solarterm_fix文件夹
-const TERM_FIX_INFO = [ 0, 3, 0, 0, 6, -12, 
-    0, -24, -27, -19, -50, -58, 
-    -13, -50, -39, -48, -36, 0, 
-    0, 0, 0, 0, 19, 0 ];
+const TERM_FIX_INFO = [10, 14, 8, 0, 17, -12, 0, -24, -27, -19, -50, -58, -13, -50, -39, -48, -36, 0, 0, 0, 0, 6, 30, 0];
 
 // 传统节日
 const TRADITIONAL_FESTIVALS = {
     '1-1': '春节',
     '1-15': '元宵节',
     '2-2': '龙抬头',
+    '3-3': '上巳节',
     '5-5': '端午节',
     '7-7': '七夕节',
     '7-15': '中元节',
@@ -200,11 +198,24 @@ export function getSolarTerm(year, month, day) {
     const termIndex1 = (month - 1) * 2;
     const termIndex2 = termIndex1 + 1;
 
+    const formatter = new Intl.DateTimeFormat('zh-CN', {
+        timeZone: 'Asia/Shanghai',
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric'
+    });
+    
     for (const idx of [termIndex1, termIndex2]) {
         const offDate = new Date(((year - YEAR_BASE) * TROPICAL_YEAR * 24 * 60  + 
-            SOLAR_TERM_INFO[idx] + TERM_FIX_INFO[idx]) * 60000 + new Date(YEAR_BASE, 0, 1).getTime());
+            SOLAR_TERM_INFO[idx] + TERM_FIX_INFO[idx]) * 60000 + new Date(`${YEAR_BASE}-01-01T00:00:00+08:00`).getTime());
 
-        if (offDate.getDate() === day) {
+        const parts = formatter.formatToParts(offDate);
+
+        // 从 parts 数组中提取数据
+        const getPart = (type) => parts.find(p => p.type === type).value;
+        // 本地日期的值就当成北京时间的日期来看待，不需要转换时区；农历就是直接跟着北京时间走的。
+        const termDay = getPart('day');
+        if (Number(termDay) === day) {
             return SOLAR_TERMS[idx];
         }
     }
@@ -227,9 +238,9 @@ export function solarToLunar(year, month, day) {
     let offset = 0;
     let temp = 0;
 
-    // 计算从1900年1月31日(农历1900年正月初一)到目标日期的天数
-    const baseDate = new Date(1900, 0, 31);
-    const targetDate = new Date(year, month - 1, day);
+    // 计算从1900年1月31日(农历1900年正月初一)到目标日期的天数，统一到北京时间的UTC维度算差值
+    const baseDate = new Date("1900-01-31T00:00:00+08:00");
+    const targetDate = new Date(`${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T00:00:00+08:00`);
     offset = Math.floor((targetDate - baseDate) / 86400000);
 
     // 计算农历年
@@ -357,7 +368,3 @@ export function getDisplayText(lunarInfo) {
     // 初一显示月份，其他显示日期
     return lunarInfo.lunarDay === 1 ? lunarInfo.monthName : lunarInfo.dayName;
 }
-
-
-
-
