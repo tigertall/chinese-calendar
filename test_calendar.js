@@ -46,11 +46,14 @@ for (const tc of testCases) {
     }
 }
 
+// 测试未来日期，不同时区，都应该是一样的结果
+const oneDay = LC.solarToLunar(2026, 4, 22);
+console.log(`2026-04-22,【三月初六】： ${oneDay.ganZhiYear}年 ${oneDay.monthName}${oneDay.dayName} 【${oneDay.zodiac}年】`);
+
 // 测试今天
 const now = new Date();
 const today = LC.solarToLunar(now.getFullYear(), now.getMonth() + 1, now.getDate());
-console.log(`今天 (${now.toLocaleDateString('zh-CN')}):`);
-console.log(`  ${today.ganZhiYear}年 ${today.monthName}${today.dayName} 【${today.zodiac}年】`);
+console.log(`今天 (${now.toLocaleDateString('zh-CN')}): ${today.ganZhiYear}年 ${today.monthName}${today.dayName} 【${today.zodiac}年】`);
 
 // 测试节气
 console.log('\n=== 2026年节气测试 ===');

@@ -59,9 +59,14 @@ const SOLAR_TERMS = [
     '寒露', '霜降', '立冬', '小雪', '大雪', '冬至'
 ];
 
+// 计算农历的基准日期：1900年1月31日（农历1900年正月初一）
+const BASE_DATE = new Date("1900-01-31T00:00:00+08:00");
+
 // 节气数据表 - 每年24节气对应的分钟偏移量基准，目前能用到 2053年，2054年冲突不可避免。
 const TROPICAL_YEAR = 365.24219878;  // 回归年长度 (天)
 const YEAR_BASE = 2000; // 计算基准年
+// 节气基准日期：2000年1月1日0时0分0秒（北京时间），这个日期是为了配合节气数据表的分钟偏移量计算的。
+const TERM_BASE_DATE = new Date(`${YEAR_BASE}-01-01T00:00:00+08:00`);
 // 数组每一项代表在2000年该节气距离北京时间2000年1月1日0时0分0秒的总分钟数
 // 节气时间： https://dijizhou.100xgj.com/jieqibiao/2026 或者使用 tyme.js库来计算
 // 紫金山天文台 pdf https://pmo.cas.cn/xwdt2019/kpdt2019/202203/t20220309_6386774.html
@@ -207,7 +212,7 @@ export function getSolarTerm(year, month, day) {
     
     for (const idx of [termIndex1, termIndex2]) {
         const offDate = new Date(((year - YEAR_BASE) * TROPICAL_YEAR * 24 * 60  + 
-            SOLAR_TERM_INFO[idx] + TERM_FIX_INFO[idx]) * 60000 + new Date(`${YEAR_BASE}-01-01T00:00:00+08:00`).getTime());
+            SOLAR_TERM_INFO[idx] + TERM_FIX_INFO[idx]) * 60000 + TERM_BASE_DATE.getTime());
 
         const parts = formatter.formatToParts(offDate);
 
@@ -239,9 +244,8 @@ export function solarToLunar(year, month, day) {
     let temp = 0;
 
     // 计算从1900年1月31日(农历1900年正月初一)到目标日期的天数，统一到北京时间的UTC维度算差值
-    const baseDate = new Date("1900-01-31T00:00:00+08:00");
     const targetDate = new Date(`${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T00:00:00+08:00`);
-    offset = Math.floor((targetDate - baseDate) / 86400000);
+    offset = Math.floor((targetDate - BASE_DATE) / 86400000);
 
     // 计算农历年
     let lunarYear = 1900;

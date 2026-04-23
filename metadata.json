@@ -5,5 +5,6 @@
     "url": "https://github.com/tigertall/chinese-calendar",
     "shell-version": ["45", "46", "47", "48", "49", "50"],
     "settings-schema": "org.gnome.shell.extensions.chinese-calendar",
-    "gettext-domain": "chinese-calendar"
+    "gettext-domain": "chinese-calendar",
+    "version-name": "1.1"
 }

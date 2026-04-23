@@ -26,7 +26,6 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
         // -- 顶栏时钟设置 --
         const panelGroup = new Adw.PreferencesGroup({
             title: '顶栏时钟',
-            description: '控制在顶栏时钟旁的显示内容',
         });
         generalPage.add(panelGroup);
 
@@ -48,14 +47,13 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
 
         // -- 法定假日设置 --
         const statutoryGroup = new Adw.PreferencesGroup({
-            title: '法定假日',
-            description: '管理法定节假日数据和显示',
+            title: '法定节假日',
         });
         generalPage.add(statutoryGroup);
 
         const showStatutoryRow = new Adw.SwitchRow({
-            title: '显示法定假日',
-            subtitle: '在日历中标记法定假日的"休"和"班"',
+            title: '显示法定节假日',
+            subtitle: '在日历中标记法定节假日的"休"和"班"',
         });
         settings.bind('show-statutory-holidays', showStatutoryRow, 'active',
             Gio.SettingsBindFlags.DEFAULT);
@@ -139,14 +137,9 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
         // -- 关于 --
         const aboutGroup = new Adw.PreferencesGroup({
             title: '关于',
+            description: `版本 ${this.metadata['version-name']}`,
         });
         generalPage.add(aboutGroup);
-
-        const versionRow = new Adw.ActionRow({
-            title: '版本',
-            subtitle: '1.0',
-        });
-        aboutGroup.add(versionRow);
 
         const githubRow = new Adw.ActionRow({
             title: 'GitHub 仓库',
