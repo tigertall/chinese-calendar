@@ -61,7 +61,7 @@ class LunarInfoSection extends St.Bin {
         this._lunarDateLabel.text = `农历 ${info.fullDate}`;
 
         // 干支年 + 生肖
-        this._ganZhiLabel.text = `${info.ganZhiYear}年 【${info.zodiac}年】`;
+        this._ganZhiLabel.text = `${info.ganZhiYear}${info.zodiac}年`;
     }
 });
 
@@ -209,7 +209,7 @@ export default class ChineseCalendarExtension extends Extension {
         }
 
         dm._clockDisplay.text = parts.length > 0
-            ? dm._clock.clock + '\u2001' + parts.join('\u2001')
+            ? dm._clock.clock + '\u2002' + parts.join('\u2002')
             : dm._clock.clock;
     }
 
@@ -382,8 +382,8 @@ export default class ChineseCalendarExtension extends Extension {
                     if (info) {
                         const current = dm._date._dateLabel.text;
                         if (!current.includes(info.zodiac)) {
-                            dm._date._dateLabel.text = current + '\u2001' +
-                                info.ganZhiYear + info.zodiac + '年' + '\u2001' + info.fullDate;
+                            dm._date._dateLabel.text = current + '\u2002' +
+                                info.ganZhiYear + info.zodiac + '年' + '\u2002' + info.fullDate;
                         }
                     }
                 }
