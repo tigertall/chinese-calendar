@@ -1,20 +1,25 @@
 // Chinese Calendar calculation module test
 import * as LC from './chineseCalendar.js';
 
-// 测试几个已知日期
+// 测试几个已知容易偏离的节气
 const testCases = [
-    { year: 2022, month: 9, day: 7, expected: '白露' },
-    { year: 2023, month: 11, day: 8, expected: '立冬' },
-    { year: 2023, month: 11, day: 22, expected: '小雪' },
-    { year: 2024, month: 2, day: 10, expected: '春节' },
-    { year: 2024, month: 1, day: 1, expected: '元旦' },
-    { year: 2025, month: 1, day: 29, expected: '春节' },
-    { year: 2026, month: 3, day: 26, expected: null },  // 今天
-    { year: 2026, month: 6, day: 5, expected: '芒种' },
-    { year: 2024, month: 9, day: 17, expected: '中秋节' },
-    { year: 2024, month: 6, day: 10, expected: '端午节' },
-    { year: 2045, month: 1, day: 20, expected: '大寒' },
-    { year: 2048, month: 1, day: 6, expected: '小寒' },
+    { year: 2022, month: 9, day: 7, expected: '白露-八月十二' },
+    { year: 2023, month: 11, day: 8, expected: '立冬-九月廿五' },
+    { year: 2023, month: 11, day: 22, expected: '小雪-十月初十' },
+    { year: 2024, month: 2, day: 10, expected: '春节-正月初一' },
+    { year: 2024, month: 1, day: 1, expected: '元旦-冬月二十' },
+    { year: 2025, month: 1, day: 29, expected: '春节-正月初一' },
+    { year: 2026, month: 2, day: 16, expected: '除夕-腊月廿九' },
+    { year: 2026, month: 3, day: 26, expected: '初八-二月初八' },  // 非节假日和节气
+
+    { year: 2026, month: 6, day: 5, expected: '芒种-四月二十' },
+    { year: 2024, month: 9, day: 17, expected: '中秋节-八月十五' },
+    { year: 2024, month: 6, day: 10, expected: '端午节-五月初五' },
+    { year: 2045, month: 1, day: 20, expected: '大寒-腊月初三' },
+    { year: 2048, month: 1, day: 6, expected: '小寒-冬月廿一' },
+    { year: 2026, month: 4, day: 22, expected: '初六-三月初六' },  // 非节假日和节气
+    { year: 2023, month: 3, day: 22, expected: '闰二月-闰二月初一' },  // 闰月
+    { year: 2023, month: 3, day: 23, expected: '初二-闰二月初二' },  // 闰月初二
 ];
 
 console.log('=== 农历计算模块测试 ===\n');
@@ -32,30 +37,17 @@ for (const tc of testCases) {
         console.log(`  显示(节日优先): ${LC.getDisplayText(info)}`);
         console.log(`  完整: ${info.ganZhiYear}年 ${info.monthName}${info.dayName} 【${info.zodiac}年】`);
         */
-        if (tc.expected) {
-            const festivals = [];
-            if (info.festival) festivals.push(info.festival);
-            if (info.gregorianFestival) festivals.push(info.gregorianFestival);
-            if (info.solarTerm) festivals.push(info.solarTerm);
-            const found = festivals.includes(tc.expected);
-            console.log(`  验证${tc.year}-${tc.month}-${tc.day}: "${tc.expected}": ${found ? 'PASS' : 'FAIL'} (got: ${festivals.join(', ')})`);
-        }
-        // console.log('');
+        const checkText = LC.getDisplayText(info) + '-' + info.fullDate;
+        const found = checkText == tc.expected;
+        console.log(`  验证${tc.year}-${tc.month}-${tc.day}: "${tc.expected}": ${found ? 'PASS' : 'FAIL'} (got: ${checkText})`);
+
     } else {
         console.log(`${tc.year}-${tc.month}-${tc.day}: 无法计算`);
     }
 }
 
-// 测试未来日期，不同时区，都应该是一样的结果
-const oneDay = LC.solarToLunar(2026, 4, 22);
-console.log(`2026-04-22,【三月初六】： ${oneDay.ganZhiYear}年 ${oneDay.monthName}${oneDay.dayName} 【${oneDay.zodiac}年】`);
-
-// 测试今天
-const now = new Date();
-const today = LC.solarToLunar(now.getFullYear(), now.getMonth() + 1, now.getDate());
-console.log(`今天 (${now.toLocaleDateString('zh-CN')}): ${today.ganZhiYear}年 ${today.monthName}${today.dayName} 【${today.zodiac}年】`);
-
 // 测试节气
+/*
 console.log('\n=== 2026年节气测试 ===');
 for (let m = 1; m <= 12; m++) {
     for (let d = 1; d <= 31; d++) {
@@ -65,6 +57,7 @@ for (let m = 1; m <= 12; m++) {
         }
     }
 }
+*/
 
 // 输出未来节气日期列表
 /*

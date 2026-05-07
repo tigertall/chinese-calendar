@@ -91,8 +91,7 @@ const TRADITIONAL_FESTIVALS = {
     '8-15': '中秋节',
     '9-9': '重阳节',
     '12-8': '腊八节',
-    '12-23': '小年',
-    '12-30': '除夕'
+    '12-23': '小年'
 };
 
 // 公历节日
@@ -264,7 +263,7 @@ export function solarToLunar(year, month, day) {
 
     // 计算农历月
     let lunarMonth = 1;
-    for (let i = 1; i < 13 && offset > 0; i++) {
+    for (let i = 1; i < 13; i++) {
         // 闰月
         if (leap > 0 && i === (leap + 1) && !isLeap) {
             --i;
@@ -309,12 +308,16 @@ export function solarToLunar(year, month, day) {
     // 农历日名
     const dayName = LUNAR_DAY_NAMES[lunarDay - 1];
 
-    // 传统节日
-    const festivalKey = `${lunarMonth}-${lunarDay}`;
-    let festival = TRADITIONAL_FESTIVALS[festivalKey] || null;
+    // 传统节日（闰月不匹配传统节日）
+    let festival = null;
+    if (!isLeap) {
+        const festivalKey = `${lunarMonth}-${lunarDay}`;
+        festival = TRADITIONAL_FESTIVALS[festivalKey] || null;
+    }
 
-    // 除夕特殊处理：腊月最后一天
-    if (lunarMonth === 12 && !festival) {
+    // 除夕特殊处理：腊月最后一天（支持闰腊月）
+    // 条件：腊月 && (没有闰腊月 || (有闰腊月且当前是闰腊月))
+    if (lunarMonth === 12 && (leap !== 12 || (leap === 12 && isLeap))) {
         const lastDay = lunarMonthDays(lunarYear, 12);
         if (lunarDay === lastDay) {
             festival = '除夕';
@@ -368,7 +371,7 @@ export function getDisplayText(lunarInfo) {
     if (holidays.length > 0) {
         return holidays[0];
     }
-
+    
     // 初一显示月份，其他显示日期
     return lunarInfo.lunarDay === 1 ? lunarInfo.monthName : lunarInfo.dayName;
 }
