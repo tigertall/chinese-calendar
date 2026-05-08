@@ -218,6 +218,9 @@ export default class ChineseCalendarExtension extends Extension {
         ml._lunarInfoSection = new LunarInfoSection();
         const mlBox = ml._scrollView.get_parent();
         mlBox.insert_child_at_index(ml._lunarInfoSection, 0);
+        
+        // 初始化时设置当前日期的农历信息
+        ml._lunarInfoSection.setDate(new Date());
     }
 
     // ===== 日历网格覆盖 =====
