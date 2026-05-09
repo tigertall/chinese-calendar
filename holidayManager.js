@@ -2,6 +2,8 @@
 // Manages statutory holiday data fetching and caching
 // GNOME Shell 48 ESM Module
 
+import { getRegion } from './locale.js';
+
 
 /**
  * 法定节假日管理器
@@ -26,6 +28,7 @@ export class HolidayManager {
             }
         } catch (e) {
             log(`[ChineseCalendar] Failed to load cached holiday data: ${e.message}`);
+            this._holidayData.clear();
         }
     }
 
@@ -43,6 +46,12 @@ export class HolidayManager {
     _parseHolidayData(data) {
         this._holidayData.clear();
         if (!data || !data.Years) return;
+
+        // 存量数据没有Region字段，保护下
+        const dataRegion = data.Region || 'CN';
+        const currentRegion = getRegion(this._settings);
+        //log('[ChineseCalendar] Data region: ' + dataRegion + ' Current region: ' + currentRegion);
+        if (dataRegion !== currentRegion) return;
 
         for (const yearStr of Object.keys(data.Years)) {
             const holidays = data.Years[yearStr];

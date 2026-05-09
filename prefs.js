@@ -10,6 +10,9 @@ import Soup from 'gi://Soup?version=3.0';
 
 import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
+// 国际化支持
+import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+
 export default class ChineseCalendarPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
@@ -18,89 +21,81 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
 
         // === 通用设置页 ===
         const generalPage = new Adw.PreferencesPage({
-            title: '通用设置',
+            title: _('General Settings'),
             icon_name: 'preferences-system-symbolic',
         });
         window.add(generalPage);
 
-        // -- 顶栏时钟设置 --
+        // -- 日历卡片和时钟面板 --
         const panelGroup = new Adw.PreferencesGroup({
-            title: '顶栏时钟',
+            title: _('Clock Panel'),
         });
         generalPage.add(panelGroup);
 
         const showInPanelRow = new Adw.SwitchRow({
-            title: '顶栏显示农历',
-            subtitle: '在顶栏时钟旁显示农历日期',
+            title: _('Show Lunar Date in Panel'),
+            subtitle: _('Display lunar date in top bar'),
         });
         settings.bind('show-lunar-in-panel', showInPanelRow, 'active',
             Gio.SettingsBindFlags.DEFAULT);
         panelGroup.add(showInPanelRow);
 
         const showFestivalsInPanelRow = new Adw.SwitchRow({
-            title: '顶栏显示节日',
-            subtitle: '有节日时在顶栏时钟旁显示节日信息',   
+            title: _('Show Festivals in Panel'),
+            subtitle: _('Display festival information in top bar when available'),   
         });
         settings.bind('show-festivals-in-panel', showFestivalsInPanelRow, 'active',
             Gio.SettingsBindFlags.DEFAULT);
         panelGroup.add(showFestivalsInPanelRow);
 
+        const regionModel = new Gtk.StringList();
+        [_('Auto'), _('Chinese Mainland'), _('Hong Kong'), _('Taiwan')]
+            .forEach(label => regionModel.append(label));
+
+        const regionValues = ['auto', 'CN', 'HK', 'TW'];
+        const currentRegion = settings.get_string('festival-region');
+        const regionIndex = regionValues.indexOf(currentRegion);
+
+        const regionRow = new Adw.ComboRow({
+            title: _('Festival Region'),
+            subtitle: _('Regional information used for festivals'),
+            model: regionModel,
+            selected: regionIndex >= 0 ? regionIndex : 0,
+        });
+        regionRow.connect('notify::selected', () => {
+            settings.set_string('festival-region', regionValues[regionRow.selected] || 'auto');
+        });
+        panelGroup.add(regionRow);
+
         // -- 法定假日设置 --
         const statutoryGroup = new Adw.PreferencesGroup({
-            title: '法定节假日',
+            title: _('Statutory Holidays'),
         });
         generalPage.add(statutoryGroup);
 
         const showStatutoryRow = new Adw.SwitchRow({
-            title: '显示法定节假日',
-            subtitle: '在日历中标记法定节假日的"休"和"班"',
+            title: _('Show Statutory Holidays'),
+            subtitle: _('Mark statutory holidays ("休" for rest, "班" for work) in calendar'),
         });
         settings.bind('show-statutory-holidays', showStatutoryRow, 'active',
             Gio.SettingsBindFlags.DEFAULT);
         statutoryGroup.add(showStatutoryRow);
 
-        // 数据URL选择
-        const urlModel = new Gtk.StringList();
-        const urls = [
-            'https://www.shuyz.com/githubfiles/china-holiday-calender/master/holidayAPI.json',
-            'https://raw.githubusercontent.com/lanceliao/china-holiday-calender/master/holidayAPI.json'
-        ];
-        const urlLabels = ['ShuYZ 镜像', 'GitHub 源'];
-        urlLabels.forEach(label => urlModel.append(label));
-
-        const urlRow = new Adw.ComboRow({
-            title: '数据源',
-            subtitle: settings.get_string('holiday-data-url'),
-            model: urlModel,
-        });
-
-        // 设置当前选中的URL
-        const currentUrl = settings.get_string('holiday-data-url');
-        const urlIndex = urls.indexOf(currentUrl);
-        urlRow.selected = urlIndex >= 0 ? urlIndex : 0;
-
-        urlRow.connect('notify::selected', () => {
-            const selectedUrl = urls[urlRow.selected] || urls[0];
-            settings.set_string('holiday-data-url', selectedUrl);
-            urlRow.subtitle = selectedUrl;
-        });
-        statutoryGroup.add(urlRow);
-
         // 上次更新时间和手动更新按钮
         const lastUpdate = settings.get_string('holiday-data-last-update');
         const lastUpdateText = lastUpdate
-            ? new Date(lastUpdate).toLocaleString('zh-CN')
-            : '从未更新';
+            ? new Date(lastUpdate).toLocaleString()
+            : _('Never updated');
 
         const updateButton = new Gtk.Button({
-            label: '立即更新',
+            label: _('Update Now'),
             valign: Gtk.Align.CENTER,
             css_classes: ['suggested-action'],
         });
 
         const updateRow = new Adw.ActionRow({
-            title: '更新数据',
-            subtitle: `上次更新: ${lastUpdateText}`,
+            title: _('Update Data'),
+            subtitle: `${_('Last update')}: ${lastUpdateText}`,
         });
         updateRow.add_suffix(updateButton);
         updateRow.activatable_widget = updateButton;
@@ -108,16 +103,16 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
 
         updateButton.connect('clicked', () => {
             updateButton.sensitive = false;
-            updateButton.label = '更新中...';
+            updateButton.label = _('Updating...');
 
             this._fetchHolidayData(settings).then(success => {
                 updateButton.sensitive = true;
                 if (success) {
-                    updateButton.label = '更新成功!';
-                    const now = new Date().toLocaleString('zh-CN');
-                    updateRow.subtitle = `上次更新: ${now}`;
+                    updateButton.label = _('Updated successfully!');
+                    const now = new Date().toLocaleString();
+                    updateRow.subtitle = `${_('Last update')}: ${now}`;
                 } else {
-                    updateButton.label = '更新失败';
+                    updateButton.label = _('Update failed');
                 }
                 // 3秒后恢复按钮文本
                 if (window._timeoutId) {
@@ -127,7 +122,7 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
                 window._timeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 3000, () => {
                     window._timeoutId = 0;
                     if (updateButton && !updateButton.is_destroyed?.()) {
-                        updateButton.label = '立即更新';
+                        updateButton.label = _('Update Now');
                     }
                     return GLib.SOURCE_REMOVE;
                 });
@@ -136,17 +131,17 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
 
         // -- 关于 --
         const aboutGroup = new Adw.PreferencesGroup({
-            title: '关于',
-            description: `版本 ${this.metadata['version-name']}`,
+            title: _('About'),
+            description: `${_('Version')} ${this.metadata['version-name']}`,
         });
         generalPage.add(aboutGroup);
 
         const githubRow = new Adw.ActionRow({
-            title: 'GitHub 仓库',
+            title: _('GitHub Repository'),
             subtitle: 'https://github.com/tigertall/chinese-calendar',
         });
         const githubButton = new Gtk.Button({
-            label: '访问',
+            label: _('Visit'),
             valign: Gtk.Align.CENTER,
         });
         githubButton.connect('clicked', () => {
@@ -156,21 +151,6 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
         githubRow.activatable_widget = githubButton;
         aboutGroup.add(githubRow);
 
-        const apiRow = new Adw.ActionRow({
-            title: '节假日数据 API',
-            subtitle: '感谢 china-holiday-calender 项目提供数据',
-        });
-        const apiButton = new Gtk.Button({
-            label: '访问',
-            valign: Gtk.Align.CENTER,
-        });
-        apiButton.connect('clicked', () => {
-            Gtk.show_uri(null, 'https://github.com/lanceliao/china-holiday-calender', Gdk.CURRENT_TIME);
-        });
-        apiRow.add_suffix(apiButton);
-        apiRow.activatable_widget = apiButton;
-        aboutGroup.add(apiRow);
-
         window.connect('close-request', () => {
             if (window._timeoutId) {
                 GLib.source_remove(window._timeoutId);
@@ -179,14 +159,31 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
         });
     }
 
+    _getHolidayUrl(region) {
+        const baseUrl = 'https://tigertall.github.io/chinese-calendar/data/holidays_';
+        let suffix = 'cn.json';
+        
+        if (region === 'auto') {
+            const lang = GLib.getenv('LANG') || '';
+            if (lang.startsWith('zh_HK') || lang.startsWith('zh-Hant_HK')) {
+                suffix = 'hk.json';
+            } else if (lang.startsWith('zh_TW') || lang.startsWith('zh-Hant_TW')) {
+                suffix = 'tw.json';
+            }
+        } else if (region === 'HK') {
+            suffix = 'hk.json';
+        } else if (region === 'TW') {
+            suffix = 'tw.json';
+        }
+        
+        return baseUrl + suffix;
+    }
+
     _fetchHolidayData(settings) {
         return new Promise((resolve) => {
-            const url = settings.get_string('holiday-data-url');
-            if (!url) {
-                resolve(false);
-                return;
-            }
-
+            const region = settings.get_string('festival-region');
+            const url = this._getHolidayUrl(region);
+            
             try {
                 const session = new Soup.Session();
                 session.set_timeout(30);
@@ -244,8 +241,9 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
      */
     _compressHolidayData(data) {
         if (!data || !data.Years) return data;
-        
-        const compressed = { Years: {} };
+        if (!data.Region) data.Region = 'CN';
+
+        const compressed = { Version: data.Version, Region: data.Region, Years: {} };
         
         for (const yearStr of Object.keys(data.Years)) {
             const yearHolidays = data.Years[yearStr];

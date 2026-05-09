@@ -1,28 +1,12 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import fs from 'fs/promises';
-import path from 'path';
+import { fetchFromGitHubPages, writeIfNeeded, getGeneratedTime, hasNextYearData, getCurrentYear } from './utils.js';
 
 /**
  * check_holidays.js
  * 
  * Scrape gov.cn policy search results for "部分节假日" and parse holiday / workday dates.
  */
-
-const REPO_OWNER = process.env.REPO_OWNER || 'tigertall';
-const REPO_NAME = process.env.REPO_NAME || 'chinese-calendar';
-
-async function getHolidays() {
-    /** 读取git pages，用于比较是否需要更新 */
-    const SEARCH_ALT_URL = `https://${REPO_OWNER}.github.io/${REPO_NAME}/holidays.json`;
-    try {
-        const response = await axios.get(SEARCH_ALT_URL, { timeout: 20000 });
-        return response.data;
-    } catch (error) {
-        console.error('获取节假日数据失败:', error.message);
-        return null;
-    }
-}
 
 async function searchPolicy(pageNo = 1, pageSize = 10) {
     /**
@@ -168,10 +152,10 @@ function parsePolicyPage(url) {
 }
 
 async function main() {
+    const existingData = await fetchFromGitHubPages('holidays_cn.json');
+    
     // 如果已经有明年数据，不需要执行了
-    const hld = await getHolidays();
-    const currentYear = new Date().getFullYear();
-    if (hld && hld.Years && hld.Years[String(currentYear + 1)]) {
+    if (hasNextYearData(existingData)) {
         console.log("明年数据已存在，无需更新。");
         return;
     }
@@ -186,25 +170,18 @@ async function main() {
             yearsData[year] = yearlyData;
         }
     }
-    const holidays = {"Version":"1.0","Generated": new Date().toISOString(), "Years": yearsData };
+    
+    const holidays = {
+        Version: "1.0",
+        Generated: getGeneratedTime(),
+        Region: 'CN',
+        Years: yearsData
+    };
 
-    if (hld && JSON.stringify(holidays.Years) === JSON.stringify(hld.Years)) {
-        console.log("No need to update holidays.");
-        return;
-    }
-
-    try {
-        const outputFile = 'holidays.json';
-        await fs.writeFile(outputFile, JSON.stringify(holidays), 'utf-8');
-        console.log(`Wrote results to ${outputFile}`);
-    } catch (error) {
-        if (error.code === 'EACCES') {
-            console.error('权限错误，无法写入文件');
-            console.log('请检查目录权限');
-        } else {
-            console.error('写入文件时出错:', error.message);
-        }
-        process.exit(1);
+    const updated = await writeIfNeeded(holidays, existingData, 'holidays_cn.json');
+    
+    if (updated) {
+        console.log('已触发更新');
     }
 }
 
@@ -213,4 +190,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     main().catch(console.error);
 }
 
-export { getHolidays, searchPolicy, parsePolicyPage, main };
+export { searchPolicy, parsePolicyPage, main };

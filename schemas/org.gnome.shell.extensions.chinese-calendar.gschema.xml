@@ -21,10 +21,10 @@
       <description>Whether to show statutory holiday markers (rest/work) in the calendar.</description>
     </key>
 
-    <key name="holiday-data-url" type="s">
-      <default>'https://www.shuyz.com/githubfiles/china-holiday-calender/master/holidayAPI.json'</default>
-      <summary>Holiday data URL</summary>
-      <description>URL to fetch statutory holiday data from.</description>
+    <key name="festival-region" type="s">
+      <default>'auto'</default>
+      <summary>Festival region</summary>
+      <description>Regional information used for festivals.</description>
     </key>
 
     <key name="holiday-data-cache" type="s">

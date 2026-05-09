@@ -1,67 +1,127 @@
-# Sample workflow for building and deploying a Jekyll site to GitHub Pages
+# Sample workflow for building and deploying holiday data to GitHub Pages
 name: Deploy holidays.json
 
 on:
   schedule:
-    - cron: '0 0 * 10-12 *' 
+    # 台湾节假日 (6-8月，UTC 00:00 = 北京时间 08:00)
+    - cron: '0 0 * 6-8 *'
+    # 中国大陆节假日 (10-12月，UTC 04:00 = 北京时间 12:00)
+    - cron: '0 4 * 10-12 *'
+    # 香港节假日 (10-12月，UTC 08:00 = 北京时间 16:00)
+    - cron: '0 8 * 10-12 *'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target region to update'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - 'all'
+          - 'cn'
+          - 'hk'
+          - 'tw'
 
 env:
-  REPO_OWNER: ${{ github.repository_owner }} # 自动获取当前仓库所有者
-  REPO_NAME: ${{ github.event.repository.name }} # 自动获取当前仓库名
+  REPO_OWNER: ${{ github.repository_owner }}
+  REPO_NAME: ${{ github.event.repository.name }}
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  # Build job
   build:
     runs-on: ubuntu-latest
     outputs:
-      # 关键：把输出变量暴露给其他 Job
       has_update: ${{ steps.update_check.outputs.has_update }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
       - name: Install dependencies
-        run: npm install axios cheerio
-      - name: Run script
-        run: node scripts/check_holidays.js
+        run: npm install axios cheerio iconv-lite
+
+      - name: Download existing data from GitHub Pages
+        run: |
+          mkdir -p data
+          FILES=("holidays_cn.json" "holidays_hk.json" "holidays_tw.json")
+          for FILE in "${FILES[@]}"; do
+            URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/data/${FILE}"
+            HTTP_CODE=$(curl -s -w "%{http_code}" -o "data/${FILE}" "${URL}" || echo "000")
+            if [ "${HTTP_CODE}" = "200" ]; then
+              echo "下载成功: ${FILE}"
+            else
+              echo "下载失败 (HTTP ${HTTP_CODE}): ${FILE}，删除空文件"
+              rm -f "data/${FILE}"
+            fi
+          done
+          echo "现有数据文件:"
+          ls -la data/
+
+      - name: Determine target region based on cron time
+        id: determine_region
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TARGET="${{ inputs.target }}"
+          else
+            # Schedule触发时仅根据UTC小时判断（月份限制已在cron中处理）
+            HOUR=$(date -u +%H)
+            case "$HOUR" in
+              "00") TARGET="tw" ;;
+              "04") TARGET="cn" ;;
+              "08") TARGET="hk" ;;
+              *)    TARGET="" ;;
+            esac
+          fi
+
+          echo "target=$TARGET" >> $GITHUB_OUTPUT
+
+      - name: Run check_holidays_cn.js (CN)
+        if: steps.determine_region.outputs.target == 'cn' || steps.determine_region.outputs.target == 'all'
+        run: node scripts/check_holidays_cn.js
+
+      - name: Run check_holidays_hk.js (HK)
+        if: steps.determine_region.outputs.target == 'hk' || steps.determine_region.outputs.target == 'all'
+        run: node scripts/check_holidays_hk.js
+
+      - name: Run check_holidays_tw.js (TW)
+        if: steps.determine_region.outputs.target == 'tw' || steps.determine_region.outputs.target == 'all'
+        run: node scripts/check_holidays_tw.js
+
       - name: Check if update needed
         id: update_check
         run: |
-          if [ -f "holidays.json" ]; then
+          if ls data/*.json 1>/dev/null 2>&1; then
             echo "has_update=true" >> $GITHUB_OUTPUT
             echo "发现更新文件，准备部署。"
           else
             echo "has_update=false" >> $GITHUB_OUTPUT
             echo "无更新文件，跳过部署。"
           fi
+
       - name: Setup Pages
         if: steps.update_check.outputs.has_update == 'true'
         uses: actions/configure-pages@v6
+
       - name: Build with Jekyll
         if: steps.update_check.outputs.has_update == 'true'
         uses: actions/jekyll-build-pages@v1
         with:
           source: ./
           destination: ./_site
+
       - name: Upload artifact
         if: steps.update_check.outputs.has_update == 'true'
         uses: actions/upload-pages-artifact@v4
 
-  # Deployment job
   deploy:
     environment:
       name: github-pages

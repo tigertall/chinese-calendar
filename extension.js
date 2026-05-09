@@ -39,8 +39,15 @@ class LunarInfoSection extends St.Bin {
             x_align: Clutter.ActorAlign.START,
         });
 
+        // 节日标签
+        this._festivalsLabel = new St.Label({
+            style_class: 'lunar-detail-festival',
+            x_align: Clutter.ActorAlign.START,
+        });
+
         this._box.add_child(this._lunarDateLabel);
         this._box.add_child(this._ganZhiLabel);
+        this._box.add_child(this._festivalsLabel);
 
         this.set_child(this._box);
     }
@@ -54,14 +61,29 @@ class LunarInfoSection extends St.Bin {
         if (!info) {
             this._lunarDateLabel.text = '';
             this._ganZhiLabel.text = '';
+            this._festivalsLabel.text = '';
             return;
         }
 
-        // 农历日期
-        this._lunarDateLabel.text = `农历 ${info.fullDate}`;
+        // 农历日期（使用本地化标签）
+        this._lunarDateLabel.text = `${ChineseCalendar.getLunarCalendarLabel()} ${info.fullDate}`;
 
         // 干支年 + 生肖
         this._ganZhiLabel.text = `${info.ganZhiYear}${info.zodiac}年`;
+
+        // 收集所有节日/节气
+        const festivals = [];
+        if (info.festival) festivals.push(info.festival);
+        if (info.gregorianFestival) festivals.push(info.gregorianFestival);
+        if (info.fixedDateFestival) festivals.push(info.fixedDateFestival);
+        if (info.solarTerm) festivals.push(info.solarTerm);
+
+        // 只有当天有多个节日/节气，或者节日名称超过4个字符（日历卡片不能完整显示）时才显示
+        if (festivals.length > 1 || (festivals.length === 1 && festivals[0].length > 4)) {
+            this._festivalsLabel.text = festivals.join('\u2002');
+        } else {
+            this._festivalsLabel.text = '';
+        }
     }
 });
 
@@ -75,6 +97,13 @@ export default class ChineseCalendarExtension extends Extension {
         this._settings = this.getSettings();
         this._injectionManager = new InjectionManager();
         this._holidayManager = new HolidayManager(this._settings);
+
+        // 保存原始构造函数引用，disable 时恢复，防止异常关闭导致代理残留
+        this._origDate = globalThis.Date;
+        this._origStButton = St.Button;
+
+        // 初始化地区化配置
+        ChineseCalendar.setHolidayRegion(this._settings);
 
         const dm = Main.panel.statusArea.dateMenu;
         const cal = dm._calendar;
@@ -101,6 +130,14 @@ export default class ChineseCalendarExtension extends Extension {
 
     disable() {
         const dm = Main.panel.statusArea.dateMenu;
+
+        // 恢复原始构造函数，避免代理残留影响其他扩展
+        if (globalThis.Date !== this._origDate) {
+            globalThis.Date = this._origDate;
+        }
+        if (St.Button !== this._origStButton) {
+            St.Button = this._origStButton;
+        }
 
         // 清除注入
         if (this._injectionManager) {
@@ -201,6 +238,7 @@ export default class ChineseCalendarExtension extends Extension {
             const festivals = [];
             if (info.festival) festivals.push(info.festival);
             if (info.gregorianFestival) festivals.push(info.gregorianFestival);
+            if (info.fixedDateFestival) festivals.push(info.fixedDateFestival);
             if (info.solarTerm) festivals.push(info.solarTerm);
 
             if (festivals.length > 0) {
@@ -344,11 +382,13 @@ export default class ChineseCalendarExtension extends Extension {
                     }
                 );
 
-                originalMethod.apply(this, arguments);
-
-                St.Button = origButton;
-                Date = origDate;
-                tempInjection.clear();
+                try {
+                    originalMethod.apply(this, arguments);
+                } finally {
+                    St.Button = origButton;
+                    Date = origDate;
+                    tempInjection.clear();
+                }
 
                 // 添加农历日历样式类
                 const calStyleClasses = cal.style_class.split(' ')
@@ -395,6 +435,8 @@ export default class ChineseCalendarExtension extends Extension {
     }
 
     _onSettingsChanged(dm, cal, ml) {
+        // 更新地区化配置
+        ChineseCalendar.setHolidayRegion(this._settings);
         // 重新加载节假日数据
         this._holidayManager.reloadData();
         // 重建日历以反映新设置

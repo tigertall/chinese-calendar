@@ -1,6 +1,8 @@
 // Chinese Calendar calculation module for GNOME Shell Extension
 // GNOME Shell 48 ESM Module
 
+import { REGION_LOCALES, REGION_FESTIVALS, getRegion } from './locale.js';
+
 /**
  * 农历数据表 (1900-2100)
  * 每个数值表示该年的农历信息，通过位运算提取：
@@ -32,32 +34,38 @@ const LUNAR_INFO = [
     0x0d520 // 2100
 ];
 
-// 天干
-const TIAN_GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+// 地区化常量（模块内部通过 _ensureConfig 延迟初始化）
+let _config = null;
 
-// 地支
-const DI_ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+function _loadConfig(settings) {
+    const region = getRegion(settings);
+    const locale = REGION_LOCALES[region];
+    const festivals = REGION_FESTIVALS[region];
+    _config = Object.freeze({
+        region,
+        tianGan: locale.tianGan,
+        diZhi: locale.diZhi,
+        shengXiao: locale.shengXiao,
+        lunarMonthNames: locale.lunarMonthNames,
+        lunarDayNames: locale.lunarDayNames,
+        solarTerms: locale.solarTerms,
+        lunarCalendarLabel: locale.lunarCalendarLabel,
+        traditionalFestivals: festivals.traditional,
+        gregorianFestivals: festivals.gregorian,
+        dynamicFestivals: festivals.dynamic,
+        fixedDateFestivals: festivals.fixedDate,
+    });
+}
 
-// 生肖
-const SHENG_XIAO = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
+function _ensureConfig() {
+    if (!_config) {
+        _loadConfig(null);
+    }
+}
 
-// 农历月份名称
-const LUNAR_MONTH_NAMES = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'];
-
-// 农历日期名称
-const LUNAR_DAY_NAMES = [
-    '初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
-    '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
-    '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'
-];
-
-// 二十四节气
-const SOLAR_TERMS = [
-    '小寒', '大寒', '立春', '雨水', '惊蛰', '春分',
-    '清明', '谷雨', '立夏', '小满', '芒种', '夏至',
-    '小暑', '大暑', '立秋', '处暑', '白露', '秋分',
-    '寒露', '霜降', '立冬', '小雪', '大雪', '冬至'
-];
+export function setHolidayRegion(settings) {
+    _loadConfig(settings);
+}
 
 // 计算农历的基准日期：1900年1月31日（农历1900年正月初一）
 const BASE_DATE = new Date("1900-01-31T00:00:00+08:00");
@@ -79,52 +87,12 @@ const SOLAR_TERM_INFO = [ 7740, 28943, 50200, 71553, 93042, 114695,
 // 有些年份计算后发生跨日偏移，需要修正，数据计算过程参考 solarterm_fix文件夹
 const TERM_FIX_INFO = [10, 14, 8, 0, 17, -12, 0, -24, -27, -19, -50, -58, -13, -50, -39, -48, -36, 0, 0, 0, 0, 6, 30, 0];
 
-// 传统节日
-const TRADITIONAL_FESTIVALS = {
-    '1-1': '春节',
-    '1-15': '元宵节',
-    '2-2': '龙抬头',
-    '3-3': '上巳节',
-    '5-5': '端午节',
-    '7-7': '七夕节',
-    '7-15': '中元节',
-    '8-15': '中秋节',
-    '9-9': '重阳节',
-    '12-8': '腊八节',
-    '12-23': '小年'
-};
-
-// 公历节日
-const GREGORIAN_FESTIVALS = {
-    '1-1': '元旦',
-    '2-14': '情人节',
-    '3-8': '妇女节',
-    '3-12': '植树节',
-    '4-1': '愚人节',
-    '5-1': '劳动节',
-    '5-4': '青年节',
-    '6-1': '儿童节',
-    '7-1': '建党节',
-    '7-7': '七七事变', // 特意增加
-    '8-1': '建军节',
-    '8-15': '日本投降', // 特意增加
-    '9-3': '抗战胜利', // 特意增加
-    '9-10': '教师节',
-    '10-1': '国庆节',
-    '12-13': '公祭日', // 特意增加
-    '12-24': '平安夜',
-    '12-25': '圣诞节'
-};
-
-/**
- * 动态节日规则
- * 格式：[月份, 第几个, 星期几(0-6, 0表示周日), 节日名称]
- */
-const DYNAMIC_FESTIVALS = [
-    [5, 2, 0, '母亲节'],    // 5月第二个星期日
-    [6, 3, 0, '父亲节'],    // 6月第三个星期日
-    [11, 4, 4, '感恩节']     // 11月第四个星期四
-];
+const _solarTermFormatter = new Intl.DateTimeFormat('zh-CN', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric'
+});
 
 /**
  * 计算动态节日
@@ -134,7 +102,8 @@ const DYNAMIC_FESTIVALS = [
  * @returns 动态节日名称，无则返回null
  */
 function getDynamicFestivals(year, month, day) {
-    for (const [festMonth, weekNum, weekday, name] of DYNAMIC_FESTIVALS) {
+    _ensureConfig();
+    for (const [festMonth, weekNum, weekday, name] of _config.dynamicFestivals) {
         if (month === festMonth) {
             // 计算该月第一个指定星期几
             const firstDay = new Date(year, month - 1, 1);
@@ -198,29 +167,22 @@ function lunarMonthDays(year, month) {
  * 获取某天的节气，如果不是节气返回null
  */
 export function getSolarTerm(year, month, day) {
+    _ensureConfig();
     // 每月有两个节气，序号为 (month-1)*2 和 (month-1)*2+1
     const termIndex1 = (month - 1) * 2;
     const termIndex2 = termIndex1 + 1;
-
-    const formatter = new Intl.DateTimeFormat('zh-CN', {
-        timeZone: 'Asia/Shanghai',
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric'
-    });
     
     for (const idx of [termIndex1, termIndex2]) {
         const offDate = new Date(((year - YEAR_BASE) * TROPICAL_YEAR * 24 * 60  + 
             SOLAR_TERM_INFO[idx] + TERM_FIX_INFO[idx]) * 60000 + TERM_BASE_DATE.getTime());
 
-        const parts = formatter.formatToParts(offDate);
+        const parts = _solarTermFormatter.formatToParts(offDate);
 
-        // 从 parts 数组中提取数据
         const getPart = (type) => parts.find(p => p.type === type).value;
         // 本地日期的值就当成北京时间的日期来看待，不需要转换时区；农历就是直接跟着北京时间走的。
         const termDay = getPart('day');
         if (Number(termDay) === day) {
-            return SOLAR_TERMS[idx];
+            return _config.solarTerms[idx];
         }
     }
 
@@ -235,6 +197,7 @@ export function getSolarTerm(year, month, day) {
  * @returns 农历信息对象
  */
 export function solarToLunar(year, month, day) {
+    _ensureConfig();
     if (year < 1900 || year > 2100) {
         return null;
     }
@@ -297,22 +260,22 @@ export function solarToLunar(year, month, day) {
     // 生成干支年
     const ganIndex = (lunarYear - 4) % 10;
     const zhiIndex = (lunarYear - 4) % 12;
-    const ganZhiYear = TIAN_GAN[ganIndex] + DI_ZHI[zhiIndex];
+    const ganZhiYear = _config.tianGan[ganIndex] + _config.diZhi[zhiIndex];
 
     // 生肖
-    const zodiac = SHENG_XIAO[(lunarYear - 4) % 12];
+    const zodiac = _config.shengXiao[(lunarYear - 4) % 12];
 
     // 农历月名
-    const monthName = (isLeap ? '闰' : '') + LUNAR_MONTH_NAMES[lunarMonth - 1] + '月';
+    const monthName = (isLeap ? '闰' : '') + _config.lunarMonthNames[lunarMonth - 1] + '月';
 
     // 农历日名
-    const dayName = LUNAR_DAY_NAMES[lunarDay - 1];
+    const dayName = _config.lunarDayNames[lunarDay - 1];
 
     // 传统节日（闰月不匹配传统节日）
     let festival = null;
     if (!isLeap) {
         const festivalKey = `${lunarMonth}-${lunarDay}`;
-        festival = TRADITIONAL_FESTIVALS[festivalKey] || null;
+        festival = _config.traditionalFestivals[festivalKey] || null;
     }
 
     // 除夕特殊处理：腊月最后一天（支持闰腊月）
@@ -326,11 +289,18 @@ export function solarToLunar(year, month, day) {
 
     // 公历节日
     const gregorianFestivalKey = `${month}-${day}`;
-    let gregorianFestival = GREGORIAN_FESTIVALS[gregorianFestivalKey] || null;
+    let gregorianFestival = _config.gregorianFestivals[gregorianFestivalKey] || null;
     
     // 动态节日
     if (!gregorianFestival) {
         gregorianFestival = getDynamicFestivals(year, month, day);
+    }
+
+    // 固定日期节日
+    let fixedDateFestival = null;
+    if (!gregorianFestival) {
+        const fixedDateKey = `${year}${month.toString().padStart(2, '0')}${day.toString().padStart(2, '0')}`;
+        fixedDateFestival = _config.fixedDateFestivals[fixedDateKey] || null;
     }
 
     // 节气
@@ -345,9 +315,10 @@ export function solarToLunar(year, month, day) {
         zodiac,
         monthName,
         dayName,
-        festival,          // 农历传统节日
-        gregorianFestival, // 公历节日
-        solarTerm,         // 节气
+        festival,            // 农历传统节日
+        gregorianFestival,   // 公历节日
+        fixedDateFestival,   // 固定日期节日
+        solarTerm,           // 节气
         fullDate: `${monthName}${dayName}`,
         displayText: dayName, // 默认显示日期
     };
@@ -365,6 +336,7 @@ export function getDisplayText(lunarInfo) {
     const holidays = [];
     if (lunarInfo.festival) holidays.push(lunarInfo.festival);
     if (lunarInfo.gregorianFestival) holidays.push(lunarInfo.gregorianFestival);
+    if (lunarInfo.fixedDateFestival) holidays.push(lunarInfo.fixedDateFestival);
     if (lunarInfo.solarTerm) holidays.push(lunarInfo.solarTerm);
 
     // 节日优先
@@ -374,4 +346,9 @@ export function getDisplayText(lunarInfo) {
     
     // 初一显示月份，其他显示日期
     return lunarInfo.lunarDay === 1 ? lunarInfo.monthName : lunarInfo.dayName;
+}
+
+export function getLunarCalendarLabel() {
+    _ensureConfig();
+    return _config.lunarCalendarLabel;
 }

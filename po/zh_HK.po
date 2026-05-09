@@ -1,0 +1,83 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: zh_HK\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "General Settings"
+msgstr "通用設定"
+
+msgid "Clock Panel"
+msgstr "時鐘面板"
+
+msgid "Regional information used for festivals"
+msgstr "節日所使用的區域資訊"
+
+msgid "Show Lunar Date in Panel"
+msgstr "頂欄顯示農曆"
+
+msgid "Display lunar date in top bar"
+msgstr "在頂欄時鐘顯示農曆日期"
+
+msgid "Show Festivals in Panel"
+msgstr "頂欄顯示節日"
+
+msgid "Display festival information in top bar when available"
+msgstr "有節日時在頂欄時鐘顯示節日資訊"
+
+msgid "Statutory Holidays"
+msgstr "公眾假期"
+
+msgid "Show Statutory Holidays"
+msgstr "顯示公眾假期"
+
+msgid "Mark statutory holidays (\"休\" for rest, \"班\" for work) in calendar"
+msgstr "在日曆中標記公眾假期的\"休\"和\"班\""
+
+msgid "Never updated"
+msgstr "從未更新"
+
+msgid "Update Now"
+msgstr "立即更新"
+
+msgid "Update Data"
+msgstr "更新數據"
+
+msgid "Last update"
+msgstr "上次更新"
+
+msgid "Updating..."
+msgstr "更新中..."
+
+msgid "Updated successfully!"
+msgstr "更新成功！"
+
+msgid "Update failed"
+msgstr "更新失敗"
+
+msgid "About"
+msgstr "關於"
+
+msgid "Version"
+msgstr "版本"
+
+msgid "GitHub Repository"
+msgstr "GitHub 倉庫"
+
+msgid "Visit"
+msgstr "訪問"
+
+msgid "Festival Region"
+msgstr "節日區域"
+
+msgid "Auto"
+msgstr "自動"
+
+msgid "Chinese Mainland"
+msgstr "中國大陸"
+
+msgid "Hong Kong"
+msgstr "中國香港"
+
+msgid "Taiwan"
+msgstr "中國台灣"

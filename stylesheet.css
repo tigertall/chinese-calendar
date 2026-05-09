@@ -48,7 +48,7 @@
 .lunar-info-box {
     padding: 8px 14px;
     margin: 4px 0;
-    spacing: 4px;
+    min-height: 4.5em;
 }
 
 .lunar-detail-date {
@@ -62,19 +62,9 @@
     color: #cccccc;
 }
 
-.lunar-detail-solarterm {
-    font-size: 0.95em;
-    color: #81d4fa;
-}
-
 .lunar-detail-festival {
     font-size: 0.95em;
-    color: #f5c211;
-}
-
-.lunar-detail-statutory {
-    font-size: 0.95em;
-    color: #a5d6a7;
+    color: #cccccc;
 }
 
 /* Message view container */

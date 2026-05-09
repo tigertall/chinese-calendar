@@ -1,0 +1,13 @@
+title: Chinese Calendar Holidays API
+description: Holiday data API for Chinese Calendar GNOME Shell Extension
+
+include:
+  - data/
+
+exclude:
+  - node_modules/
+  - scripts/
+  - .github/
+  - locale/
+  - schemas/
+  - po/
