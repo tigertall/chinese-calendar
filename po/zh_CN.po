@@ -67,6 +67,12 @@ msgstr "GitHub 仓库"
 msgid "Visit"
 msgstr "访问"
 
+msgid "Show Lunar Detail"
+msgstr "显示农历详情"
+
+msgid "Display lunar date and Ganzhi information in the calendar popup notification area"
+msgstr "在日历弹窗通知区域显示农历日期和干支信息"
+
 msgid "Festival Region"
 msgstr "节日区域"
 

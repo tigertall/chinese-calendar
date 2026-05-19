@@ -256,7 +256,11 @@ export default class ChineseCalendarExtension extends Extension {
         ml._lunarInfoSection = new LunarInfoSection();
         const mlBox = ml._scrollView.get_parent();
         mlBox.insert_child_at_index(ml._lunarInfoSection, 0);
-        
+
+        // 根据设置控制显示状态
+        ml._lunarInfoSection.visible =
+            this._settings.get_boolean('show-lunar-detail-in-calendar');
+
         // 初始化时设置当前日期的农历信息
         ml._lunarInfoSection.setDate(new Date());
     }
@@ -435,6 +439,11 @@ export default class ChineseCalendarExtension extends Extension {
     }
 
     _onSettingsChanged(dm, cal, ml) {
+        // 更新农历详情的显示状态
+        if (ml._lunarInfoSection) {
+            ml._lunarInfoSection.visible =
+                this._settings.get_boolean('show-lunar-detail-in-calendar');
+        }
         // 更新地区化配置
         ChineseCalendar.setHolidayRegion(this._settings);
         // 重新加载节假日数据
