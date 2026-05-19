@@ -1,119 +1,132 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
 msgid ""
 msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-16 21:18+0800\n"
-"Language: zh_TW\n"
+"POT-Creation-Date: 2026-05-20 20:18+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Content-Transfer-Encoding: 8bit\n"
 
 #: prefs.js:24
 msgid "General Settings"
-msgstr "通用設定"
+msgstr ""
 
 #: prefs.js:31
 msgid "Clock Panel"
-msgstr "時鐘面板"
+msgstr ""
 
 #: prefs.js:36
 msgid "Show Lunar Date in Panel"
-msgstr "頂欄顯示農曆"
+msgstr ""
 
 #: prefs.js:37
 msgid "Display lunar date in top bar"
-msgstr "在頂欄時鐘顯示農曆日期"
+msgstr ""
 
 #: prefs.js:44
 msgid "Show Festivals in Panel"
-msgstr "頂欄顯示節日"
+msgstr ""
 
 #: prefs.js:45
 msgid "Display festival information in top bar when available"
-msgstr "有節日時在頂欄時鐘顯示節日資訊"
+msgstr ""
 
 #: prefs.js:52
 msgid "Auto"
-msgstr "自動"
+msgstr ""
 
 #: prefs.js:52
 msgid "Chinese Mainland"
-msgstr "中國大陸"
+msgstr ""
 
 #: prefs.js:52
 msgid "Hong Kong"
-msgstr "中國香港"
+msgstr ""
 
 #: prefs.js:52
 msgid "Taiwan"
-msgstr "中國台灣"
+msgstr ""
 
 #: prefs.js:60
 msgid "Festival Region"
-msgstr "節日區域"
+msgstr ""
 
 #: prefs.js:61
 msgid "Regional information used for festivals"
-msgstr "節日所使用的區域資訊"
+msgstr ""
 
 #: prefs.js:71
 msgid "Show Lunar Detail"
-msgstr "顯示農曆詳情"
+msgstr ""
 
 #: prefs.js:72
-msgid "Display lunar date and Ganzhi information in the calendar popup notification area"
-msgstr "在日曆彈窗通知區域顯示農曆日期和干支資訊"
+msgid ""
+"Display lunar date and Ganzhi information in the calendar popup notification "
+"area"
+msgstr ""
 
 #: prefs.js:80
 msgid "Statutory Holidays"
-msgstr "法定假日"
+msgstr ""
 
 #: prefs.js:85
 msgid "Show Statutory Holidays"
-msgstr "顯示法定假日"
+msgstr ""
 
 #: prefs.js:86
 msgid "Mark statutory holidays (\"休\" for rest, \"班\" for work) in calendar"
-msgstr "在日曆中標記法定假日的\"休\"和\"班\""
+msgstr ""
 
 #: prefs.js:96
 msgid "Never updated"
-msgstr "從未更新"
+msgstr ""
 
 #: prefs.js:99 prefs.js:133
 msgid "Update Now"
-msgstr "立即更新"
+msgstr ""
 
 #: prefs.js:105
 msgid "Update Data"
-msgstr "更新數據"
+msgstr ""
 
 #: prefs.js:106 prefs.js:121
 msgid "Last update"
-msgstr "上次更新"
+msgstr ""
 
 #: prefs.js:114
 msgid "Updating..."
-msgstr "更新中..."
+msgstr ""
 
 #: prefs.js:119
 msgid "Updated successfully!"
-msgstr "更新成功！"
+msgstr ""
 
 #: prefs.js:123
 msgid "Update failed"
-msgstr "更新失敗"
+msgstr ""
 
 #: prefs.js:142
 msgid "About"
-msgstr "關於"
+msgstr ""
 
 #: prefs.js:143
 msgid "Version"
-msgstr "版本"
+msgstr ""
 
 #: prefs.js:148
 msgid "GitHub Repository"
-msgstr "GitHub 倉庫"
+msgstr ""
 
 #: prefs.js:152
 msgid "Visit"
-msgstr "訪問"
+msgstr ""

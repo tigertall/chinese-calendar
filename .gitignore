@@ -33,3 +33,6 @@ npm-debug.log*
 
 # Ignore package lock file (uncomment to ignore)
 # package-lock.json
+
+# Ignore built translation files
+locale/
