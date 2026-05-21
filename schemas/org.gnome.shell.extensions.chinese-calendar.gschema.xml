@@ -15,6 +15,12 @@
       <description>Whether to show festival information next to the clock in the top panel.</description>
     </key>
 
+    <key name="show-lunar-detail-in-calendar" type="b">
+      <default>true</default>
+      <summary>Show lunar detail in calendar popup</summary>
+      <description>Whether to show detailed lunar date and Ganzhi information in the calendar popup.</description>
+    </key>
+
     <key name="show-statutory-holidays" type="b">
       <default>true</default>
       <summary>Show statutory holidays</summary>

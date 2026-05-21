@@ -67,6 +67,14 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
         });
         panelGroup.add(regionRow);
 
+        const showLunarDetailRow = new Adw.SwitchRow({
+            title: _('Show Lunar Detail'),
+            subtitle: _('Display lunar date and Ganzhi information in the calendar popup notification area'),
+        });
+        settings.bind('show-lunar-detail-in-calendar', showLunarDetailRow, 'active',
+            Gio.SettingsBindFlags.DEFAULT);
+        panelGroup.add(showLunarDetailRow);
+
         // -- 法定假日设置 --
         const statutoryGroup = new Adw.PreferencesGroup({
             title: _('Statutory Holidays'),
