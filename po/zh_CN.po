@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-16 21:18+0800\n"
+"Report-Msgid-Bugs-To: tiger <tigertall@126.com>\n"
+"POT-Creation-Date: 2026-05-20 20:18+0800\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
@@ -59,7 +59,9 @@ msgid "Show Lunar Detail"
 msgstr "显示农历详情"
 
 #: prefs.js:72
-msgid "Display lunar date and Ganzhi information in the calendar popup notification area"
+msgid ""
+"Display lunar date and Ganzhi information in the calendar popup notification "
+"area"
 msgstr "在日历弹窗通知区域显示农历日期和干支信息"
 
 #: prefs.js:80
