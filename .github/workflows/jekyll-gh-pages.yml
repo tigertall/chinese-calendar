@@ -3,12 +3,7 @@ name: Deploy holidays.json
 
 on:
   schedule:
-    # 台湾节假日 (6-8月，UTC 00:00 = 北京时间 08:00)
-    - cron: '0 0 * 6-8 *'
-    # 中国大陆节假日 (10-12月，UTC 04:00 = 北京时间 12:00)
-    - cron: '0 4 * 10-12 *'
-    # 香港节假日 (10-12月，UTC 08:00 = 北京时间 16:00)
-    - cron: '0 8 * 10-12 *'
+    - cron: '30 0 * 6-12 *'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -65,20 +60,23 @@ jobs:
           done
           echo "现有数据文件:"
           ls -la data/
+          for FILE in holidays_cn.json holidays_hk.json holidays_tw.json; do
+            if [ -f "data/${FILE}" ]; then
+              stat -c %Y "data/${FILE}" > "data/${FILE}.ts"
+            fi
+          done
 
-      - name: Determine target region based on cron time
+      - name: Determine target region
         id: determine_region
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             TARGET="${{ inputs.target }}"
           else
-            # Schedule触发时仅根据UTC小时判断（月份限制已在cron中处理）
-            HOUR=$(date -u +%H)
-            case "$HOUR" in
-              "00") TARGET="tw" ;;
-              "04") TARGET="cn" ;;
-              "08") TARGET="hk" ;;
-              *)    TARGET="" ;;
+            MONTH=$(date -u +%-m)
+            case "$MONTH" in
+              6|7|8|9) TARGET="tw" ;;
+              10|11|12) TARGET="all" ;;
+              *) TARGET="" ;;
             esac
           fi
 
@@ -99,11 +97,28 @@ jobs:
       - name: Check if update needed
         id: update_check
         run: |
-          if ls data/*.json 1>/dev/null 2>&1; then
-            echo "has_update=true" >> $GITHUB_OUTPUT
+          HAS_UPDATE=false
+          for FILE in holidays_cn.json holidays_hk.json holidays_tw.json; do
+            if [ ! -f "data/${FILE}" ]; then
+              continue
+            fi
+            if [ ! -f "data/${FILE}.ts" ]; then
+              HAS_UPDATE=true
+              echo "${FILE}: 新文件，需要部署。"
+              break
+            fi
+            NEW_TS=$(stat -c %Y "data/${FILE}")
+            OLD_TS=$(cat "data/${FILE}.ts")
+            if [ "${NEW_TS}" != "${OLD_TS}" ]; then
+              HAS_UPDATE=true
+              echo "${FILE}: 内容有变化，需要部署。"
+              break
+            fi
+          done
+          echo "has_update=${HAS_UPDATE}" >> $GITHUB_OUTPUT
+          if [ "${HAS_UPDATE}" = "true" ]; then
             echo "发现更新文件，准备部署。"
           else
-            echo "has_update=false" >> $GITHUB_OUTPUT
             echo "无更新文件，跳过部署。"
           fi
 
