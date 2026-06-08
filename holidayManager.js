@@ -1,6 +1,5 @@
 // Holiday Manager module for GNOME Shell Extension
 // Manages statutory holiday data fetching and caching
-// GNOME Shell 48 ESM Module
 
 import { getRegion } from './locale.js';
 

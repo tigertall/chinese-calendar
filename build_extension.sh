@@ -24,6 +24,6 @@ fi
 
 # 打包扩展（不包含 po/ 源文件，只包含编译后的 locale/）
 zip -r chinese-calendar.zip chineseCalendar.js extension.js holidayManager.js \
- locale.js LICENSE metadata.json prefs.js README.md stylesheet.css schemas/ locale/
+ locale.js LICENSE metadata.json prefs.js stylesheet.css schemas/ locale/
 
 echo "Extension package 'chinese-calendar.zip' has been created."

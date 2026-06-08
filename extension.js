@@ -1,6 +1,5 @@
 // Chinese Calendar GNOME Shell Extension
-// Main extension module for GNOME Shell 48
-// Displays Chinese lunar calendar in panel and calendar popup
+// Displays Chinese lunar calendar in clock panel and calendar popup
 
 import Clutter from 'gi://Clutter';
 import GObject from 'gi://GObject';
@@ -72,11 +71,7 @@ class LunarInfoSection extends St.Bin {
         this._ganZhiLabel.text = `${info.ganZhiYear}${info.zodiac}年`;
 
         // 收集所有节日/节气
-        const festivals = [];
-        if (info.festival) festivals.push(info.festival);
-        if (info.gregorianFestival) festivals.push(info.gregorianFestival);
-        if (info.fixedDateFestival) festivals.push(info.fixedDateFestival);
-        if (info.solarTerm) festivals.push(info.solarTerm);
+        const festivals = ChineseCalendar.getFestivals(info);
 
         // 只有当天有多个节日/节气，或者节日名称超过4个字符（日历卡片不能完整显示）时才显示
         if (festivals.length > 1 || (festivals.length === 1 && festivals[0].length > 4)) {
@@ -157,11 +152,6 @@ export default class ChineseCalendarExtension extends Extension {
             delete this._replacementFunc.clockId;
         }
 
-        // 立即刷新显示为纯公历，不等待下一次分钟变化
-        if (dm._clockDisplay) {
-            dm._clockDisplay.text = dm._clock.clock;
-        }
-
         // 移除农历信息区域
         if (dm._messageList._lunarInfoSection) {
             dm._messageList._lunarInfoSection.destroy();
@@ -184,6 +174,14 @@ export default class ChineseCalendarExtension extends Extension {
         if (this._holidayManager) {
             this._holidayManager.destroy();
             this._holidayManager = null;
+        }
+
+        // 清理农历模块内部状态
+        ChineseCalendar.clearConfig();
+        
+        // 立即刷新显示为纯公历，不等待下一次分钟变化
+        if (dm._clockDisplay) {
+            dm._clockDisplay.text = dm._clock.clock;
         }
 
         // 恢复日历样式并重建日历
@@ -235,11 +233,7 @@ export default class ChineseCalendarExtension extends Extension {
 
         // 显示节日信息（如果启用）
         if (showFestivalsInPanel) {
-            const festivals = [];
-            if (info.festival) festivals.push(info.festival);
-            if (info.gregorianFestival) festivals.push(info.gregorianFestival);
-            if (info.fixedDateFestival) festivals.push(info.fixedDateFestival);
-            if (info.solarTerm) festivals.push(info.solarTerm);
+            const festivals = ChineseCalendar.getFestivals(info);
 
             if (festivals.length > 0) {
                 parts.push(festivals[0]);
@@ -273,68 +267,65 @@ export default class ChineseCalendarExtension extends Extension {
 
         const ml = dm._messageList;
 
+        // Proxy 状态对象：缓存 Proxy，每次 rebuild 重置 iterDate 即可复用
+        const proxyState = {iterDate: null};
+
+        // Date Proxy：追踪日历网格中的日期迭代（只创建一次）
+        const DateProxy = new Proxy(this._origDate, {
+            construct(target, args) {
+                const instance = Reflect.construct(target, args);
+                if (!proxyState.iterDate._lunarIterFound &&
+                    args.length > 0 && args[0] instanceof target) {
+                    proxyState.iterDate = instance;
+                }
+                return instance;
+            }
+        });
+
+        // St.Button Proxy：注入农历文本（只创建一次）
+        const ButtonProxy = new Proxy(this._origStButton, {
+            construct(target, args) {
+                if (+args[0].label === +proxyState.iterDate.getDate().toString()) {
+                    proxyState.iterDate._lunarIterFound = true;
+
+                    const year = proxyState.iterDate.getFullYear();
+                    const month = proxyState.iterDate.getMonth() + 1;
+                    const day = proxyState.iterDate.getDate();
+
+                    const info = ChineseCalendar.solarToLunar(year, month, day);
+                    const cellText = info ? ChineseCalendar.getDisplayText(info) : '';
+
+                    if (cellText) {
+                        args[0].label += '\n';
+                    }
+
+                    const newButton = Reflect.construct(target, args);
+
+                    if (cellText) {
+                        newButton._lunarText = cellText;
+                        newButton._lunarInfo = info;
+                        newButton._year = proxyState.iterDate.getFullYear();
+                        newButton._month = proxyState.iterDate.getMonth() + 1;
+                        newButton._day = proxyState.iterDate.getDate();
+                    }
+
+                    return newButton;
+                }
+
+                return Reflect.construct(target, args);
+            }
+        });
+
         // 覆盖 _rebuildCalendar 方法
         this._injectionManager.overrideMethod(
             cal, '_rebuildCalendar', originalMethod => function () {
                 if (rebuildInProgress) return;
                 rebuildInProgress = true;
 
-                const origButton = St.Button;
-                const origDate = Date;
-                let iterDate = new origDate();
+                // 重置迭代状态，复用已缓存的 Proxy
+                proxyState.iterDate = new self._origDate();
 
-                // 临时替换 Date 构造函数来追踪迭代日期（使用 Proxy）
-                const DateProxy = new Proxy(origDate, {
-                    construct(target, args) {
-                        const instance = Reflect.construct(target, args);
-                        // 追踪日历网格中的日期迭代
-                        if (!iterDate._lunarIterFound &&
-                            args.length > 0 && args[0] instanceof origDate) {
-                            iterDate = instance;
-                        }
-                        return instance;
-                    }
-                });
                 Date = DateProxy;
-
-                // 临时替换 St.Button 来注入农历文本（使用 Proxy）
-                const ButtonProxy = new Proxy(origButton, {
-                    construct(target, args) {
-                        // 判断是否需要添加农历信息（在创建按钮之前）
-                        if (+args[0].label === +iterDate.getDate().toString()) {
-                            iterDate._lunarIterFound = true;
-
-                            const year = iterDate.getFullYear();
-                            const month = iterDate.getMonth() + 1;
-                            const day = iterDate.getDate();
-
-                            const info = ChineseCalendar.solarToLunar(year, month, day);
-                            const cellText = info ? ChineseCalendar.getDisplayText(info) : '';
-
-                            // 添加换行使日历格子能显示两行
-                            if (cellText) {
-                                args[0].label += '\n';  // ← 在创建按钮前修改参数
-                            }
-
-                            // 创建原始按钮实例（此时 label 已经包含 \n）
-                            const newButton = Reflect.construct(target, args);
-
-                            // 附加农历信息到按钮对象
-                            if (cellText) {
-                                newButton._lunarText = cellText;
-                                newButton._lunarInfo = info;
-                                newButton._year = iterDate.getFullYear();
-                                newButton._month = iterDate.getMonth() + 1;
-                                newButton._day = iterDate.getDate();
-                            }
-
-                            return newButton;
-                        }
-
-                        // 不需要处理的情况：直接创建
-                        return Reflect.construct(target, args);
-                    }
-                });
                 St.Button = ButtonProxy;
 
                 // 临时覆盖 layout attach 来添加农历标签层
@@ -389,8 +380,8 @@ export default class ChineseCalendarExtension extends Extension {
                 try {
                     originalMethod.apply(this, arguments);
                 } finally {
-                    St.Button = origButton;
-                    Date = origDate;
+                    St.Button = self._origStButton;
+                    Date = self._origDate;
                     tempInjection.clear();
                 }
 
@@ -444,11 +435,11 @@ export default class ChineseCalendarExtension extends Extension {
             ml._lunarInfoSection.visible =
                 this._settings.get_boolean('show-lunar-detail-in-calendar');
         }
-        // 更新地区化配置
+
         ChineseCalendar.setHolidayRegion(this._settings);
-        // 重新加载节假日数据
+
         this._holidayManager.reloadData();
-        // 重建日历以反映新设置
+
         this._updatePanelClock(dm);
         cal._rebuildCalendar();
         if (cal._selectedDate) {

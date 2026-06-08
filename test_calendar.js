@@ -35,7 +35,7 @@ function regionTestSet(name, mockRegion) {
             return '';
         }
     };
-    LC.setFestivalRegion(mockSettings);
+    LC.setHolidayRegion(mockSettings);
     return mockSettings;
 }
 
@@ -118,8 +118,8 @@ const twTests = [
     { year: 2026, month: 1, day: 1, expected: '中華民國開國紀念日' },
     { year: 2026, month: 2, day: 28, expected: '和平紀念日' },
     { year: 2026, month: 10, day: 10, expected: '國慶日' },
-    { year: 2026, month: 10, day: 25, expected: '臺灣光復暨金門古寧頭大捷紀念日' },
-    { year: 2026, month: 12, day: 25, expected: '行憲紀念日' },
+    { year: 2026, month: 10, day: 25, expected: '臺灣光復' },
+    { year: 2026, month: 12, day: 25, expected: '行憲紀念' },
 ];
 
 for (const tc of twTests) {

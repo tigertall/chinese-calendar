@@ -67,6 +67,10 @@ export function setHolidayRegion(settings) {
     _loadConfig(settings);
 }
 
+export function clearConfig() {
+    _config = null;
+}
+
 // 计算农历的基准日期：1900年1月31日（农历1900年正月初一）
 const BASE_DATE = new Date("1900-01-31T00:00:00+08:00");
 
@@ -325,6 +329,21 @@ export function solarToLunar(year, month, day) {
 }
 
 /**
+ * 收集所有节日/节气信息
+ * @param lunarInfo 农历信息对象
+ * @returns {string[]} 节日/节气名称数组
+ */
+export function getFestivals(lunarInfo) {
+    if (!lunarInfo) return [];
+    const festivals = [];
+    if (lunarInfo.festival) festivals.push(lunarInfo.festival);
+    if (lunarInfo.gregorianFestival) festivals.push(lunarInfo.gregorianFestival);
+    if (lunarInfo.fixedDateFestival) festivals.push(lunarInfo.fixedDateFestival);
+    if (lunarInfo.solarTerm) festivals.push(lunarInfo.solarTerm);
+    return festivals;
+}
+
+/**
  * 获取显示文本（节日优先，初一显示月份）
  * @param lunarInfo 农历信息对象
  * @returns 显示文本
@@ -332,12 +351,7 @@ export function solarToLunar(year, month, day) {
 export function getDisplayText(lunarInfo) {
     if (!lunarInfo) return '';
 
-    // 按优先级收集节日/节气
-    const holidays = [];
-    if (lunarInfo.festival) holidays.push(lunarInfo.festival);
-    if (lunarInfo.gregorianFestival) holidays.push(lunarInfo.gregorianFestival);
-    if (lunarInfo.fixedDateFestival) holidays.push(lunarInfo.fixedDateFestival);
-    if (lunarInfo.solarTerm) holidays.push(lunarInfo.solarTerm);
+    const holidays = getFestivals(lunarInfo);
 
     // 节日优先
     if (holidays.length > 0) {

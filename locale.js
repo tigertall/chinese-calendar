@@ -243,6 +243,3 @@ export function getRegion(settings) {
     if (lang.startsWith('zh_HK')) return 'HK';
     return 'CN';
 }
-
-// 当前地区
-export const CURRENT_REGION = getRegion();
