@@ -234,6 +234,11 @@ async function main() {
         }
 
         // 合并输出到单个 JSON 文件
+        if (Object.keys(yearsData).length === 0) {
+            console.log('未能获取到任何年份数据，跳过写入以避免覆盖已有文件。');
+            return;
+        }
+
         const holidays = {
             Version: '1.0',
             Generated: getGeneratedTime(),
