@@ -67,8 +67,8 @@ class LunarInfoSection extends St.Bin {
         // 农历日期（使用本地化标签）
         this._lunarDateLabel.text = `${ChineseCalendar.getLunarCalendarLabel()} ${info.fullDate}`;
 
-        // 干支年 + 生肖
-        this._ganZhiLabel.text = `${info.ganZhiYear}${info.zodiac}年`;
+        // 干支年 + 生肖 + 月干支 + 日干支
+        this._ganZhiLabel.text = `${info.ganZhiYear}${info.zodiac}年 ${info.monthGanZhi}月 ${info.dayGanZhi}日`;
 
         // 收集所有节日/节气
         const festivals = ChineseCalendar.getFestivals(info);

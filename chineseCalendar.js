@@ -99,6 +99,66 @@ const _solarTermFormatter = new Intl.DateTimeFormat('zh-CN', {
 });
 
 /**
+ * 获取指定节气的北京时间日期（返回 UTC 时间戳，用于比较先后）
+ */
+function getJieTimestamp(year, termIndex) {
+    const offDate = new Date(((year - YEAR_BASE) * TROPICAL_YEAR * 24 * 60 + 
+        SOLAR_TERM_INFO[termIndex] + TERM_FIX_INFO[termIndex]) * 60000 + TERM_BASE_DATE.getTime());
+    const parts = _solarTermFormatter.formatToParts(offDate);
+    const y = parseInt(parts.find(p => p.type === 'year').value);
+    const m = parseInt(parts.find(p => p.type === 'month').value);
+    const d = parseInt(parts.find(p => p.type === 'day').value);
+    // 节气日期北京时间 00:00:00 对应 UTC 时间戳
+    return new Date(`${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}T00:00:00+08:00`).getTime();
+}
+
+/**
+ * 获取公历日期的干支月信息（基于节气而非农历月）
+ * 返回 { ganZhiYear, monthIndex }，monthIndex: 1=寅月...12=丑月
+ */
+function getGanzhiMonthInfo(year, month, day) {
+    const targetTs = new Date(`${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T00:00:00+08:00`).getTime();
+
+    // 十二「节」索引及其对应的干支月：
+    // [termIndex, monthNumber(1=寅)]
+    // 按时间顺序：小寒(0)→丑月, 立春(2)→寅月, ..., 大雪(22)→子月
+    const JIE_MAP = [
+        [0, 12], [2, 1], [4, 2], [6, 3], [8, 4], [10, 5],
+        [12, 6], [14, 7], [16, 8], [18, 9], [20, 10], [22, 11],
+    ];
+
+    // 立春决定干支年分界
+    const lichunTs = getJieTimestamp(year, 2);
+
+    if (targetTs < lichunTs) {
+        // 立春之前，干支年仍属上一年（年柱以立春为界）
+        const prevGanZhiYear = year - 1;
+        const xiaohanTs = getJieTimestamp(year, 0); // 本年小寒（约1月6日）
+        if (targetTs >= xiaohanTs) {
+            return { ganZhiYear: prevGanZhiYear, monthIndex: 12 }; // 丑月
+        }
+        // 大雪之后、小寒之前
+        return { ganZhiYear: prevGanZhiYear, monthIndex: 11 }; // 子月
+    }
+
+    // 立春及之后，遍历节气确定月份
+    for (let i = 1; i < JIE_MAP.length; i++) {
+        const [termIdx] = JIE_MAP[i];
+        const jieTs = getJieTimestamp(year, termIdx);
+        if (targetTs < jieTs) {
+            return { ganZhiYear: year, monthIndex: JIE_MAP[i - 1][1] };
+        }
+    }
+
+    // 大雪之后，检查下一年小寒
+    const nextXiaohanTs = getJieTimestamp(year + 1, 0);
+    if (targetTs < nextXiaohanTs) {
+        return { ganZhiYear: year, monthIndex: 11 }; // 子月
+    }
+    return { ganZhiYear: year + 1, monthIndex: 12 }; // 下年小寒之后，丑月
+}
+
+/**
  * 计算动态节日
  * @param year 公历年
  * @param month 公历月 (1-12)
@@ -213,6 +273,9 @@ export function solarToLunar(year, month, day) {
     const targetDate = new Date(`${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T00:00:00+08:00`);
     offset = Math.floor((targetDate - BASE_DATE) / 86400000);
 
+    // 保存总偏移量用于日干支计算（后续年月循环会消耗 offset）
+    const totalOffset = offset;
+
     // 计算农历年
     let lunarYear = 1900;
     for (let i = 1900; i < 2101 && offset > 0; i++) {
@@ -269,6 +332,20 @@ export function solarToLunar(year, month, day) {
     // 生肖
     const zodiac = _config.shengXiao[(lunarYear - 4) % 12];
 
+    // 月干支（基于节气：五虎遁，正月为寅月始于立春）
+    const {ganZhiYear: gzYear, monthIndex} = getGanzhiMonthInfo(year, month, day);
+    const gzYearGanIndex = (gzYear - 4) % 10;
+    const firstMonthGanIndex = (gzYearGanIndex * 2 + 2) % 10;
+    const monthGanIndex = (firstMonthGanIndex + monthIndex - 1) % 10;
+    const monthZhiIndex = (monthIndex + 1) % 12;
+    const monthGanZhi = _config.tianGan[monthGanIndex] + _config.diZhi[monthZhiIndex];
+
+    // 日干支（1900-01-31 = 甲辰日，在60日周期中位置为40）
+    const dayCyclePos = (40 + totalOffset) % 60;
+    const dayGanIndex = dayCyclePos % 10;
+    const dayZhiIndex = dayCyclePos % 12;
+    const dayGanZhi = _config.tianGan[dayGanIndex] + _config.diZhi[dayZhiIndex];
+
     // 农历月名
     const monthName = (isLeap ? '闰' : '') + _config.lunarMonthNames[lunarMonth - 1] + '月';
 
@@ -317,6 +394,8 @@ export function solarToLunar(year, month, day) {
         isLeap,
         ganZhiYear,
         zodiac,
+        monthGanZhi,
+        dayGanZhi,
         monthName,
         dayName,
         festival,            // 农历传统节日
