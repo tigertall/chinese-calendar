@@ -420,8 +420,7 @@ export default class ChineseCalendarExtension extends Extension {
                     if (info) {
                         const current = dm._date._dateLabel.text;
                         if (!current.includes(info.zodiac)) {
-                            dm._date._dateLabel.text = current + '\u2002' +
-                                info.ganZhiYear + info.zodiac + '年' + '\u2002' + info.fullDate;
+                            dm._date._dateLabel.text = current + '\u2002' + info.fullDate;
                         }
                     }
                 }
