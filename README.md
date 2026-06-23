@@ -2,7 +2,7 @@
 
 在 GNOME 时钟面板和日历卡片中显示中国农历日期、节气、传统节日和法定节假日调休信息。
 
-Display Chinese lunar dates, solar terms, traditional festivals, and statutory holidays in the GNOME clock panel and calendar popup.
+Display Chinese lunar calendar, solar terms, traditional festivals, and statutory holidays in the GNOME clock panel and calendar popup.
 
 <img width="800" alt="calendar" src="https://github.com/user-attachments/assets/df39964c-eb61-4393-ada9-1d8fc080e89b" />
 
@@ -18,7 +18,7 @@ Display Chinese lunar dates, solar terms, traditional festivals, and statutory h
 
 ## 安装方法
 
-### GNOME Extension 网站
+### GNOME Extensions 网站
 
 [<img alt="" height="80" src="https://raw.githubusercontent.com/andyholmes/gnome-shell-extensions-badge/master/get-it-on-ego.svg?sanitize=true">](https://extensions.gnome.org/extension/9586/chinese-calendar/)
 
@@ -28,7 +28,9 @@ Display Chinese lunar dates, solar terms, traditional festivals, and statutory h
 2. `gnome-extensions install --force chinese-calendar.zip`
 3. 退出当前的 GNOME 会话，重新登录，这样才能在 GNOME 扩展管理中显示
 4. 在 GNOME 扩展管理中启用和设置扩展
-5. 如果要显示法定节假日调休信息，记得在设置中操作一次【更新数据】
+
+
+如果要显示法定节假日调休信息，记得在设置中操作一次【更新数据】
 
 ## 设置选项
 
