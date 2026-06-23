@@ -41,6 +41,4 @@
 
 加载 tyme 基准数据，与 ChineseCalendar.js 逐日对比干支、农历日期、节气。
 
-注意因为tyme.js是按照立春切换年干支，常规日历是按照春节切换年干支，所以年干支对比会有差异。
-
 `gjs -m compare_with_tyme.js`

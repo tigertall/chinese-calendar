@@ -19,7 +19,7 @@ for (let y = START; y <= END; y++) {
             const termDay = solarDay.getTermDay();
             const key = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
             result[key] = {
-                yearGz: scd.getYear().getName(),
+                yearGz: lunarDay.getLunarMonth().getLunarYear().getSixtyCycle().getName(), // 年初一为界（GB/T 33661-2017）
                 monthGz: scd.getMonth().getName(),
                 dayGz: scd.getSixtyCycle().getName(),
                 lunarYear: lunarDay.getYear(),

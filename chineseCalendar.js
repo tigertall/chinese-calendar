@@ -114,7 +114,9 @@ function getJieTimestamp(year, termIndex) {
 
 /**
  * 获取公历日期的干支月信息（基于节气而非农历月）
- * 返回 { ganZhiYear, monthIndex }，monthIndex: 1=寅月...12=丑月
+ * 返回 { termYear, monthIndex }
+ *   termYear: 节气年（立春为界），专用于五虎遁推算月天干
+ *   monthIndex: 1=寅月...12=丑月
  */
 function getGanzhiMonthInfo(year, month, day) {
     const targetTs = new Date(`${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T00:00:00+08:00`).getTime();
@@ -135,10 +137,10 @@ function getGanzhiMonthInfo(year, month, day) {
         const prevGanZhiYear = year - 1;
         const xiaohanTs = getJieTimestamp(year, 0); // 本年小寒（约1月6日）
         if (targetTs >= xiaohanTs) {
-            return { ganZhiYear: prevGanZhiYear, monthIndex: 12 }; // 丑月
+            return { termYear: prevGanZhiYear, monthIndex: 12 }; // 丑月
         }
         // 大雪之后、小寒之前
-        return { ganZhiYear: prevGanZhiYear, monthIndex: 11 }; // 子月
+        return { termYear: prevGanZhiYear, monthIndex: 11 }; // 子月
     }
 
     // 立春及之后，遍历节气确定月份
@@ -146,16 +148,16 @@ function getGanzhiMonthInfo(year, month, day) {
         const [termIdx] = JIE_MAP[i];
         const jieTs = getJieTimestamp(year, termIdx);
         if (targetTs < jieTs) {
-            return { ganZhiYear: year, monthIndex: JIE_MAP[i - 1][1] };
+            return { termYear: year, monthIndex: JIE_MAP[i - 1][1] };
         }
     }
 
     // 大雪之后，检查下一年小寒
     const nextXiaohanTs = getJieTimestamp(year + 1, 0);
     if (targetTs < nextXiaohanTs) {
-        return { ganZhiYear: year, monthIndex: 11 }; // 子月
+        return { termYear: year, monthIndex: 11 }; // 子月
     }
-    return { ganZhiYear: year + 1, monthIndex: 12 }; // 下年小寒之后，丑月
+    return { termYear: year + 1, monthIndex: 12 }; // 下年小寒之后，丑月
 }
 
 /**
@@ -332,10 +334,10 @@ export function solarToLunar(year, month, day) {
     // 生肖
     const zodiac = _config.shengXiao[(lunarYear - 4) % 12];
 
-    // 月干支（基于节气：五虎遁，正月为寅月始于立春）
-    const {ganZhiYear: gzYear, monthIndex} = getGanzhiMonthInfo(year, month, day);
-    const gzYearGanIndex = (gzYear - 4) % 10;
-    const firstMonthGanIndex = (gzYearGanIndex * 2 + 2) % 10;
+    // 月干支（基于节气：五虎遁，寅月天干由节气年天干决定）
+    const {termYear, monthIndex} = getGanzhiMonthInfo(year, month, day);
+    const termYearGanIndex = (termYear - 4) % 10;
+    const firstMonthGanIndex = (termYearGanIndex * 2 + 2) % 10;
     const monthGanIndex = (firstMonthGanIndex + monthIndex - 1) % 10;
     const monthZhiIndex = (monthIndex + 1) % 12;
     const monthGanZhi = _config.tianGan[monthGanIndex] + _config.diZhi[monthZhiIndex];
