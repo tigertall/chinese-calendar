@@ -1,7 +1,7 @@
 // Chinese Calendar calculation module for GNOME Shell Extension
 // GNOME Shell 48 ESM Module
 
-import { REGION_LOCALES, REGION_FESTIVALS, getRegion } from './locale.js';
+import { REGION_LOCALES, REGION_FESTIVALS, getRegion, formatDateKey } from './locale.js';
 
 /**
  * 农历数据表 (1900-2100)
@@ -91,6 +91,14 @@ const SOLAR_TERM_INFO = [ 7740, 28943, 50200, 71553, 93042, 114695,
 // 有些年份计算后发生跨日偏移，需要修正，数据计算过程参考 solarterm_fix文件夹
 const TERM_FIX_INFO = [10, 14, 8, 0, 17, -12, 0, -24, -27, -19, -50, -58, -13, -50, -39, -48, -36, 0, 0, 0, 0, 6, 30, 0];
 
+// 十二「节」索引及其对应的干支月：
+// [termIndex, monthNumber(1=寅)]
+// 按时间顺序：小寒(0)→丑月, 立春(2)→寅月, ..., 大雪(22)→子月
+const JIE_MAP = [
+    [0, 12], [2, 1], [4, 2], [6, 3], [8, 4], [10, 5],
+    [12, 6], [14, 7], [16, 8], [18, 9], [20, 10], [22, 11],
+];
+
 const _solarTermFormatter = new Intl.DateTimeFormat('zh-CN', {
     timeZone: 'Asia/Shanghai',
     year: 'numeric',
@@ -99,11 +107,18 @@ const _solarTermFormatter = new Intl.DateTimeFormat('zh-CN', {
 });
 
 /**
+ * 计算节气距离基准日的天数（节气计算核心函数）
+ */
+function _computeTermDayOffset(year, termIndex) {
+    return (year - YEAR_BASE) * TROPICAL_YEAR * 24 * 60 +
+        SOLAR_TERM_INFO[termIndex] + TERM_FIX_INFO[termIndex];
+}
+
+/**
  * 获取指定节气的北京时间日期（返回 UTC 时间戳，用于比较先后）
  */
 function getJieTimestamp(year, termIndex) {
-    const offDate = new Date(((year - YEAR_BASE) * TROPICAL_YEAR * 24 * 60 + 
-        SOLAR_TERM_INFO[termIndex] + TERM_FIX_INFO[termIndex]) * 60000 + TERM_BASE_DATE.getTime());
+    const offDate = new Date(_computeTermDayOffset(year, termIndex) * 60000 + TERM_BASE_DATE.getTime());
     const parts = _solarTermFormatter.formatToParts(offDate);
     const y = parseInt(parts.find(p => p.type === 'year').value);
     const m = parseInt(parts.find(p => p.type === 'month').value);
@@ -119,15 +134,7 @@ function getJieTimestamp(year, termIndex) {
  *   monthIndex: 1=寅月...12=丑月
  */
 function getGanzhiMonthInfo(year, month, day) {
-    const targetTs = new Date(`${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T00:00:00+08:00`).getTime();
-
-    // 十二「节」索引及其对应的干支月：
-    // [termIndex, monthNumber(1=寅)]
-    // 按时间顺序：小寒(0)→丑月, 立春(2)→寅月, ..., 大雪(22)→子月
-    const JIE_MAP = [
-        [0, 12], [2, 1], [4, 2], [6, 3], [8, 4], [10, 5],
-        [12, 6], [14, 7], [16, 8], [18, 9], [20, 10], [22, 11],
-    ];
+    const targetTs = new Date(formatDateKey(year, month, day) + 'T00:00:00+08:00').getTime();
 
     // 立春决定干支年分界
     const lichunTs = getJieTimestamp(year, 2);
@@ -239,15 +246,9 @@ export function getSolarTerm(year, month, day) {
     const termIndex2 = termIndex1 + 1;
     
     for (const idx of [termIndex1, termIndex2]) {
-        const offDate = new Date(((year - YEAR_BASE) * TROPICAL_YEAR * 24 * 60  + 
-            SOLAR_TERM_INFO[idx] + TERM_FIX_INFO[idx]) * 60000 + TERM_BASE_DATE.getTime());
-
-        const parts = _solarTermFormatter.formatToParts(offDate);
-
-        const getPart = (type) => parts.find(p => p.type === type).value;
-        // 本地日期的值就当成北京时间的日期来看待，不需要转换时区；农历就是直接跟着北京时间走的。
-        const termDay = getPart('day');
-        if (Number(termDay) === day) {
+        const offDate = new Date(_computeTermDayOffset(year, idx) * 60000 + TERM_BASE_DATE.getTime());
+        const termDay = Number(_solarTermFormatter.formatToParts(offDate).find(p => p.type === 'day').value);
+        if (termDay === day) {
             return _config.solarTerms[idx];
         }
     }
@@ -272,7 +273,7 @@ export function solarToLunar(year, month, day) {
     let temp = 0;
 
     // 计算从1900年1月31日(农历1900年正月初一)到目标日期的天数，统一到北京时间的UTC维度算差值
-    const targetDate = new Date(`${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T00:00:00+08:00`);
+    const targetDate = new Date(formatDateKey(year, month, day) + 'T00:00:00+08:00');
     offset = Math.floor((targetDate - BASE_DATE) / 86400000);
 
     // 保存总偏移量用于日干支计算（后续年月循环会消耗 offset）
@@ -382,7 +383,7 @@ export function solarToLunar(year, month, day) {
     // 固定日期节日
     let fixedDateFestival = null;
     if (!gregorianFestival) {
-        const fixedDateKey = `${year}${month.toString().padStart(2, '0')}${day.toString().padStart(2, '0')}`;
+        const fixedDateKey = `${year}${String(month).padStart(2, '0')}${String(day).padStart(2, '0')}`;
         fixedDateFestival = _config.fixedDateFestivals[fixedDateKey] || null;
     }
 

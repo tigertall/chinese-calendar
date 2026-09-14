@@ -230,6 +230,11 @@ export const REGION_FESTIVALS = {
     }
 };
 
+// 格式化日期键 (YYYY-MM-DD)
+export function formatDateKey(year, month, day) {
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
+
 // 获取当前地区
 export function getRegion(settings) {
     if (settings) {

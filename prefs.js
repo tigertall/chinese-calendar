@@ -173,9 +173,9 @@ export default class ChineseCalendarPreferences extends ExtensionPreferences {
         
         if (region === 'auto') {
             const lang = GLib.getenv('LANG') || '';
-            if (lang.startsWith('zh_HK') || lang.startsWith('zh-Hant_HK')) {
+            if (lang.startsWith('zh_HK')) {
                 suffix = 'hk.json';
-            } else if (lang.startsWith('zh_TW') || lang.startsWith('zh-Hant_TW')) {
+            } else if (lang.startsWith('zh_TW')) {
                 suffix = 'tw.json';
             }
         } else if (region === 'HK') {

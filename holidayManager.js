@@ -1,7 +1,7 @@
 // Holiday Manager module for GNOME Shell Extension
 // Manages statutory holiday data fetching and caching
 
-import { getRegion } from './locale.js';
+import { getRegion, formatDateKey } from './locale.js';
 
 
 /**
@@ -65,9 +65,7 @@ export class HolidayManager {
                 
                 // 遍历从开始日期到结束日期的每一天
                 for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-                    const dateKey = `${d.getFullYear()}-` +
-                                  `${String(d.getMonth() + 1).padStart(2, '0')}-` +
-                                  `${String(d.getDate()).padStart(2, '0')}`;
+                    const dateKey = formatDateKey(d.getFullYear(), d.getMonth() + 1, d.getDate());
 
                     this._holidayData.set(dateKey, {
                         isHoliday: true,
@@ -100,15 +98,7 @@ export class HolidayManager {
      * @returns {Object|null} { isHoliday, isWorkDay, name }
      */
     getStatutoryHoliday(year, month, day) {
-        const dateKey = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const entry = this._holidayData.get(dateKey);
-        if (!entry) return null;
-
-        return {
-            isHoliday: entry.isHoliday,
-            isWorkDay: entry.isWorkday, // 调休补班
-            name: entry.name || '',
-        };
+        return this._holidayData.get(formatDateKey(year, month, day)) || null;
     }
 
     /**
