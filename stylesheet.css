@@ -47,20 +47,23 @@
     min-height: 4.5em;
 }
 
+/* No hard-coded color here: inherit the popup foreground so the text adapts to
+   both light and dark color schemes. The previous values (#eeeeee / #cccccc)
+   were only readable on a dark popup and became invisible on a light one.
+   The original visual hierarchy is preserved with opacity instead. */
 .lunar-detail-date {
     font-size: 1.1em;
     font-weight: bold;
-    color: #eeeeee;
 }
 
 .lunar-detail-ganzhi {
     font-size: 0.95em;
-    color: #cccccc;
+    opacity: 0.7;
 }
 
 .lunar-detail-festival {
     font-size: 0.95em;
-    color: #cccccc;
+    opacity: 0.7;
 }
 
 /* Message view container */
