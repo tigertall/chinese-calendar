@@ -22,7 +22,7 @@ class LunarInfoSection extends St.Bin {
 
         this._box = new St.BoxLayout({
             style_class: 'lunar-info-box',
-            vertical: true,
+            orientation: Clutter.Orientation.VERTICAL,
             x_expand: true,
         });
 
@@ -358,7 +358,7 @@ export default class ChineseCalendarExtension extends Extension {
                                     if (statutory.isHoliday) {
                                         badgeText = '休';
                                         badgeClass = 'lunar-badge lunar-badge-rest';
-                                    } else if (statutory.isWorkDay) {
+                                    } else if (statutory.isWorkday) {
                                         badgeText = '班';
                                         badgeClass = 'lunar-badge lunar-badge-work';
                                     }

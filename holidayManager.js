@@ -95,7 +95,7 @@ export class HolidayManager {
      * @param year 公历年
      * @param month 公历月 (1-12)
      * @param day 公历日
-     * @returns {Object|null} { isHoliday, isWorkDay, name }
+     * @returns {Object|null} { isHoliday, isWorkday, name }
      */
     getStatutoryHoliday(year, month, day) {
         return this._holidayData.get(formatDateKey(year, month, day)) || null;
