@@ -5,6 +5,7 @@ import Clutter from 'gi://Clutter';
 import GObject from 'gi://GObject';
 import St from 'gi://St';
 
+import * as Config from 'resource:///org/gnome/shell/misc/config.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {Extension, InjectionManager} from 'resource:///org/gnome/shell/extensions/extension.js';
 
@@ -20,10 +21,14 @@ class LunarInfoSection extends St.Bin {
             style_class: 'message-view',
         });
 
+        const [major] = Config.PACKAGE_VERSION.split('.').map(Number);
         this._box = new St.BoxLayout({
             style_class: 'lunar-info-box',
-            orientation: Clutter.Orientation.VERTICAL,
             x_expand: true,
+            ...(major >= 48
+                ? { orientation: Clutter.Orientation.VERTICAL }
+                : { vertical: true }
+            ),
         });
 
         // 农历日期
