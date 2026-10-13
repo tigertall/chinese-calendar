@@ -340,11 +340,6 @@ export default class ChineseCalendarExtension extends Extension {
                     origAttach => function (child, left, top, width, height) {
                         origAttach.apply(this, [child, left, top, width, height]);
                         if (child._lunarText) {
-                            // 构造农历文本标签。覆盖层是非交互文本，
-                            // 不应携带日期按钮的 calendar-day 类，否则会
-                            // 继承单元格的背景/内边距，与主题对日历单元格
-                            // 的样式叠加冲突。仅保留专用的 lunar-day 类，
-                            // “今天”用 lunar-today 修饰。
                             const dayStyle = ['lunar-day'];
                             if (child.style_class.split(' ')
                                 .includes('calendar-today'))
