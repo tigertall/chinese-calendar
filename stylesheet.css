@@ -22,7 +22,7 @@
 }
 
 /* Today's lunar date */
-.lunar-calendar .lunar-day.calendar-today {
+.lunar-calendar .lunar-day.lunar-today {
     font-weight: bold;
 }
 
