@@ -340,10 +340,12 @@ export default class ChineseCalendarExtension extends Extension {
                     origAttach => function (child, left, top, width, height) {
                         origAttach.apply(this, [child, left, top, width, height]);
                         if (child._lunarText) {
+                            const childClasses = child.style_class.split(' ');
                             const dayStyle = ['lunar-day'];
-                            if (child.style_class.split(' ')
-                                .includes('calendar-today'))
-                                dayStyle.push('lunar-today');
+                            if (childClasses.includes('calendar-weekend'))
+                                dayStyle.push('calendar-weekend');
+                            if (childClasses.includes('calendar-other-month'))
+                                dayStyle.push('calendar-other-month');
 
                             const lb = new St.Label({
                                 text: '\n' + child._lunarText,

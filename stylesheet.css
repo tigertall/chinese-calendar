@@ -19,11 +19,15 @@
 .lunar-calendar .lunar-day {
     background-color: transparent !important;
     font-size: 0.64em;
+    font-weight: bold;
 }
 
-/* Today's lunar date */
-.lunar-calendar .lunar-day.lunar-today {
-    font-weight: bold;
+.lunar-calendar .lunar-day.calendar-other-month{
+    font-weight: normal;
+}
+
+.lunar-calendar .lunar-day.calendar-weekend {
+    color: #9b9b9d;
 }
 
 /* ===== Rest/Work Badge on Calendar Grid ===== */
