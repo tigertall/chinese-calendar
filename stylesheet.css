@@ -20,11 +20,21 @@
     background-color: transparent !important;
     font-size: 0.64em;
     font-weight: bold;
+<<<<<<< HEAD
     color: #9b9b9d;
+=======
+>>>>>>> origin/master
 }
 
 .lunar-calendar .lunar-day.calendar-other-month{
     font-weight: normal;
+<<<<<<< HEAD
+=======
+}
+
+.lunar-calendar .lunar-day.calendar-weekend {
+    color: #9b9b9d;
+>>>>>>> origin/master
 }
 
 /* ===== Rest/Work Badge on Calendar Grid ===== */

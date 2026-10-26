@@ -342,6 +342,11 @@ export default class ChineseCalendarExtension extends Extension {
                         if (child._lunarText) {
                             const childClasses = child.style_class.split(' ');
                             const dayStyle = ['lunar-day'];
+<<<<<<< HEAD
+=======
+                            if (childClasses.includes('calendar-weekend'))
+                                dayStyle.push('calendar-weekend');
+>>>>>>> origin/master
                             if (childClasses.includes('calendar-other-month'))
                                 dayStyle.push('calendar-other-month');
 
