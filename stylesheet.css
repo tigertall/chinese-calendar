@@ -20,14 +20,11 @@
     background-color: transparent !important;
     font-size: 0.64em;
     font-weight: bold;
+    color: #9b9b9d;
 }
 
 .lunar-calendar .lunar-day.calendar-other-month{
     font-weight: normal;
-}
-
-.lunar-calendar .lunar-day.calendar-weekend {
-    color: #9b9b9d;
 }
 
 /* ===== Rest/Work Badge on Calendar Grid ===== */
